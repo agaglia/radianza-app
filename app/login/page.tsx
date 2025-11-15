@@ -56,7 +56,6 @@ export default function LoginPage() {
                 priority
               />
             </div>
-            <p className="text-radianza-deep-blue/70 mt-2">Gruppo Spirituale</p>
           </div>
 
           {/* Form */}
