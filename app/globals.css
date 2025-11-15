@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Colori Radianza - Celestiali e Dorati */
+  --radianza-gold: #D4AF37;
+  --radianza-light-gold: #F4E4C1;
+  --radianza-deep-blue: #1a237e;
+  --radianza-sky-blue: #4fc3f7;
+  --radianza-celestial: #e3f2fd;
+  --radianza-white: #ffffff;
+  --radianza-dark: #0d1b2a;
+  
+  --background: var(--radianza-white);
+  --foreground: var(--radianza-dark);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  
+  /* Colori personalizzati Radianza */
+  --color-radianza-gold: var(--radianza-gold);
+  --color-radianza-light-gold: var(--radianza-light-gold);
+  --color-radianza-deep-blue: var(--radianza-deep-blue);
+  --color-radianza-sky-blue: var(--radianza-sky-blue);
+  --color-radianza-celestial: var(--radianza-celestial);
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, var(--radianza-celestial) 0%, var(--radianza-white) 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Scrollbar personalizzata */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--radianza-celestial);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--radianza-gold);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--radianza-deep-blue);
 }
