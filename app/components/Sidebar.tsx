@@ -83,7 +83,7 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
       {/* Header */}
       <div className="p-4 border-b border-radianza-gold/30">
         <div className="flex items-center justify-between">
-          {!collapsed && (
+          {!collapsed ? (
             <div className="flex items-center space-x-3">
               <Image
                 src="/RADIANZA_Logo.png"
@@ -94,18 +94,35 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
                 priority
               />
             </div>
+          ) : (
+            <div className="flex justify-center w-full">
+              <Image
+                src="/RADIANZA_Logo.png"
+                alt="Radianza Logo"
+                width={50}
+                height={50}
+                className="rounded-lg"
+                priority
+              />
+            </div>
           )}
+          {!collapsed && (
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className="p-2 hover:bg-radianza-gold/20 rounded-lg transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-radianza-deep-blue" />
+            </button>
+          )}
+        </div>
+        {collapsed && (
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-2 hover:bg-radianza-gold/20 rounded-lg transition-colors"
+            className="w-full mt-2 p-2 hover:bg-radianza-gold/20 rounded-lg transition-colors flex justify-center"
           >
-            {collapsed ? (
-              <ChevronRight className="w-5 h-5 text-radianza-deep-blue" />
-            ) : (
-              <ChevronLeft className="w-5 h-5 text-radianza-deep-blue" />
-            )}
+            <ChevronRight className="w-5 h-5 text-radianza-deep-blue" />
           </button>
-        </div>
+        )}
       </div>
 
       {/* Menu */}
