@@ -7,8 +7,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Radianza - Gruppo Spirituale",
+  title: "Radianza",
   description: "Portale del gruppo spirituale Radianza",
+  icons: {
+    icon: '/RADIANZA_Logo.png',
+  },
 };
 
 export default function RootLayout({
