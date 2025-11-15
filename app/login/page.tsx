@@ -45,13 +45,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md relative">
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-radianza-gold/30">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center items-center mb-8">
             <Image 
               src="/RADIANZA_Logo.png" 
               alt="Radianza Logo" 
               width={220} 
               height={220} 
-              className="rounded-2xl shadow-xl"
+              className="rounded-2xl shadow-2xl drop-shadow-2xl"
               priority
             />
           </div>
