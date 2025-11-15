@@ -50,8 +50,8 @@ export default function LoginPage() {
               <Image 
                 src="/RADIANZA_Logo.png" 
                 alt="Radianza Logo" 
-                width={400} 
-                height={400} 
+                width={280} 
+                height={280} 
                 className="rounded-2xl shadow-2xl"
                 priority
               />
