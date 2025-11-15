@@ -243,7 +243,7 @@ export default function ContentClient({ contents }: { contents: Content[] }) {
 // Componente per la card del contenuto
 function ContentCard({ content, getCategoryIcon, getCategoryName }: { 
   content: Content, 
-  getCategoryIcon: (type: string) => JSX.Element,
+  getCategoryIcon: (type: string) => React.ReactNode,
   getCategoryName: (type: string) => string 
 }) {
   return (
