@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { Sparkles } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -47,12 +46,16 @@ export default function LoginPage() {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-radianza-gold/30">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-radianza-gold to-radianza-deep-blue rounded-full mb-4 shadow-lg">
-              <Sparkles className="w-10 h-10 text-white" />
+            <div className="inline-flex items-center justify-center mb-4">
+              <Image 
+                src="/images/logo-radianza.png" 
+                alt="Radianza Logo" 
+                width={280} 
+                height={200} 
+                className="rounded-2xl shadow-lg"
+                priority
+              />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-radianza-gold via-radianza-deep-blue to-radianza-sky-blue bg-clip-text text-transparent">
-              RADIANZA
-            </h1>
             <p className="text-radianza-deep-blue/70 mt-2">Gruppo Spirituale</p>
           </div>
 
