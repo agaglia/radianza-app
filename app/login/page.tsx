@@ -46,15 +46,10 @@ export default function LoginPage() {
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-radianza-gold/30">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center mb-4">
-              <Image 
-                src="/images/logo-radianza.png" 
-                alt="Radianza Logo" 
-                width={280} 
-                height={200} 
-                className="rounded-2xl shadow-lg"
-                priority
-              />
+            <div className="inline-flex items-center justify-center mb-4 px-8 py-6 bg-gradient-to-br from-radianza-deep-blue via-radianza-sky-blue to-radianza-gold rounded-2xl shadow-lg">
+              <h1 className="text-5xl font-bold text-white tracking-wider">
+                RADIANZA
+              </h1>
             </div>
             <p className="text-radianza-deep-blue/70 mt-2">Gruppo Spirituale</p>
           </div>
