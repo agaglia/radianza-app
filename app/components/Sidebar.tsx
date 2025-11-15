@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
   LayoutDashboard,
   Users,
@@ -14,7 +15,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
   Mail,
   Bell,
   ClipboardCheck
@@ -85,15 +85,14 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
         <div className="flex items-center justify-between">
           {!collapsed && (
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-radianza-gold to-radianza-deep-blue rounded-full flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold bg-gradient-to-r from-radianza-gold via-radianza-deep-blue to-radianza-sky-blue bg-clip-text text-transparent">
-                  RADIANZA
-                </h1>
-                <p className="text-xs text-radianza-deep-blue/60">Gruppo Spirituale</p>
-              </div>
+              <Image
+                src="/RADIANZA_Logo.png"
+                alt="Radianza Logo"
+                width={140}
+                height={40}
+                className="rounded-lg"
+                priority
+              />
             </div>
           )}
           <button
