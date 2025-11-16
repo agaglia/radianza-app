@@ -336,16 +336,39 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                 </div>
               )}
               {newContent.type === 'music' && (
-                <div>
-                  <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
-                  <input
-                    type="url"
-                    value={newContent.url}
-                    onChange={(e) => setNewContent({ ...newContent, url: e.target.value })}
-                    className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                    placeholder="https://..."
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
+                    <input
+                      type="url"
+                      value={newContent.url}
+                      onChange={(e) => setNewContent({ ...newContent, url: e.target.value })}
+                      className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Cover Art (Immagine)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={fileInputRef}
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0]
+                          setImagePreview(URL.createObjectURL(file))
+                        } else {
+                          setImagePreview(null)
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none bg-white"
+                    />
+                    {imagePreview && (
+                      <img src={imagePreview} alt="Anteprima" className="mt-2 rounded-lg max-h-48 border" />
+                    )}
+                    {uploading && <div className="text-sm text-radianza-gold mt-2">Caricamento in corso...</div>}
+                  </div>
+                </>
               )}
               {(newContent.type === 'text' || newContent.type === 'poem' || newContent.type === 'letter' || newContent.type === 'mantra' || newContent.type === 'mediradiananza') && (
                 <div>
@@ -508,16 +531,39 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                 </div>
               )}
               {editContent.type === 'music' && (
-                <div>
-                  <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
-                  <input
-                    type="url"
-                    value={editContent.url || ''}
-                    onChange={e => setEditContent({ ...editContent, url: e.target.value })}
-                    className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                    placeholder="https://..."
-                  />
-                </div>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
+                    <input
+                      type="url"
+                      value={editContent.url || ''}
+                      onChange={e => setEditContent({ ...editContent, url: e.target.value })}
+                      className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Cambia Cover Art</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={editFileInputRef}
+                      onChange={e => {
+                        if (e.target.files && e.target.files[0]) {
+                          const file = e.target.files[0]
+                          setEditImagePreview(URL.createObjectURL(file))
+                        } else {
+                          setEditImagePreview(editingContent.url || null)
+                        }
+                      }}
+                      className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none bg-white"
+                    />
+                    {editImagePreview && (
+                      <img src={editImagePreview} alt="Anteprima" className="mt-2 rounded-lg max-h-48 border" />
+                    )}
+                    {editUploading && <div className="text-sm text-radianza-gold mt-2">Caricamento in corso...</div>}
+                  </div>
+                </>
               )}
               {(editContent.type === 'text' || editContent.type === 'poem' || editContent.type === 'letter' || editContent.type === 'mantra' || editContent.type === 'mediradiananza') && (
                 <div>

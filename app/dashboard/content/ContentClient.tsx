@@ -258,6 +258,12 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
               alt={content.title}
               className="w-full h-full object-cover"
             />
+          ) : content.type === 'music' ? (
+            <img
+              src={content.url}
+              alt={content.title}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Music className="w-16 h-16 text-radianza-gold" />
