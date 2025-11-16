@@ -236,6 +236,13 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                       setEditingContent(content)
                       setEditContent({ ...content })
                       setEditImagePreview(content.type === 'image' && content.url ? content.url : null)
+                      // Se è una musica, estrai l'URL audio dal text_content
+                      if (content.type === 'music' && content.text_content?.startsWith('AUDIO_URL:')) {
+                        setEditMusicAudioUrl(content.text_content.replace('AUDIO_URL:', ''))
+                        setEditImagePreview(content.url || null)
+                      } else {
+                        setEditMusicAudioUrl('')
+                      }
                       setEditModal(true)
                     }}
                     className="p-2 text-radianza-gold hover:bg-radianza-gold/20 rounded-lg transition-colors"
