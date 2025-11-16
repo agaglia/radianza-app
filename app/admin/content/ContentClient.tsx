@@ -106,8 +106,9 @@ export default function ContentClient({ contents, userId, meetings }: { contents
       // Per gli altri: url come prima
       let urlToSave = imageUrl || (newContent.type === 'music' ? '' : newContent.url)
       let textContentToSave = newContent.text_content
-      if (newContent.type === 'music' && audioUrl) {
-        textContentToSave = `AUDIO_URL:${audioUrl}`
+      if (newContent.type === 'music') {
+        // Per le musiche, salva sempre l'URL audio con il prefisso AUDIO_URL:
+        textContentToSave = audioUrl ? `AUDIO_URL:${audioUrl}` : ''
       }
       
       const { error } = await supabase
@@ -455,8 +456,9 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   }
                   
                   let textContentToSave = editContent.text_content
-                  if (editContent.type === 'music' && audioUrl) {
-                    textContentToSave = `AUDIO_URL:${audioUrl}`
+                  if (editContent.type === 'music') {
+                    // Per le musiche, salva sempre l'URL audio con il prefisso AUDIO_URL:
+                    textContentToSave = audioUrl ? `AUDIO_URL:${audioUrl}` : editContent.text_content
                   }
                   
                   const { error } = await supabase
