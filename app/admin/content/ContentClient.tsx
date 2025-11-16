@@ -23,9 +23,10 @@ interface Content {
   meetings?: Meeting
 }
 
-export default function ContentClient({ contents, userId, meetings }: { contents: Content[], userId: string, meetings: Meeting[] }) {
+export default function ContentClient({ contents: initialContents, userId, meetings }: { contents: Content[], userId: string, meetings: Meeting[] }) {
   const [showModal, setShowModal] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [contents, setContents] = useState<Content[]>(initialContents)
   const [newContent, setNewContent] = useState({
     title: '',
     description: '',
@@ -50,6 +51,21 @@ export default function ContentClient({ contents, userId, meetings }: { contents
   
   const router = useRouter()
   const supabase = createClient()
+
+  // Funzione per ricaricare i contenuti dal database
+  const reloadContents = async () => {
+    try {
+      const { data } = await supabase
+        .from('content')
+        .select('*, meetings(*)')
+        .order('created_at', { ascending: false })
+      if (data) {
+        setContents(data)
+      }
+    } catch (error) {
+      console.error('Error reloading contents:', error)
+    }
+  }
 
   const categories = [
     { id: 'all', name: 'Tutti', icon: <FileText className="w-4 h-4" /> },
@@ -129,7 +145,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
       setMusicAudioUrl('')
       setImagePreview(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
-      router.refresh()
+      await reloadContents()
     } catch (error: any) {
       setUploading(false)
       alert('❌ Errore: ' + error.message)
@@ -147,8 +163,8 @@ export default function ContentClient({ contents, userId, meetings }: { contents
 
       if (error) throw error
 
-      alert('✅ Contenuto eliminato')
-      router.refresh()
+      alert('✅ Contenuto eliminato!')
+      await reloadContents()
     } catch (error: any) {
       alert('❌ Errore: ' + error.message)
     }
@@ -501,7 +517,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     setEditImagePreview(null)
                   }, 100)
                   if (editFileInputRef.current) editFileInputRef.current.value = ''
-                  router.refresh()
+                  await reloadContents()
                 } catch (error: any) {
                   setEditUploading(false)
                   alert('❌ Errore: ' + error.message)
