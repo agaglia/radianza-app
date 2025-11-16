@@ -34,6 +34,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
     text_content: '',
     meeting_id: ''
   })
+  const [musicAudioUrl, setMusicAudioUrl] = useState('') // Per le musiche: URL audio
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
@@ -42,6 +43,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
   const [editModal, setEditModal] = useState(false)
   const [editingContent, setEditingContent] = useState<Content | null>(null)
   const [editContent, setEditContent] = useState<any>(null)
+  const [editMusicAudioUrl, setEditMusicAudioUrl] = useState('') // Per le musiche: URL audio in edit
   const editFileInputRef = useRef<HTMLInputElement | null>(null)
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null)
   const [editUploading, setEditUploading] = useState(false)
@@ -77,7 +79,9 @@ export default function ContentClient({ contents, userId, meetings }: { contents
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      let imageUrl = newContent.url
+      let imageUrl = newContent.type === 'music' ? '' : newContent.url
+      let audioUrl = newContent.type === 'music' ? musicAudioUrl : ''
+      
       // Se il tipo è image o music e c'è un file selezionato, carica su Supabase Storage
       if ((newContent.type === 'image' || newContent.type === 'music') && fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
         setUploading(true)
@@ -97,14 +101,23 @@ export default function ContentClient({ contents, userId, meetings }: { contents
         }
         setUploading(false)
       }
+      
+      // Per le musiche: url = cover art, text_content = audio URL
+      // Per gli altri: url come prima
+      let urlToSave = imageUrl || (newContent.type === 'music' ? '' : newContent.url)
+      let textContentToSave = newContent.text_content
+      if (newContent.type === 'music' && audioUrl) {
+        textContentToSave = `AUDIO_URL:${audioUrl}`
+      }
+      
       const { error } = await supabase
         .from('content')
         .insert({
           title: newContent.title,
           description: newContent.description || null,
           type: newContent.type,
-          url: imageUrl || null,
-          text_content: newContent.text_content || null,
+          url: urlToSave || null,
+          text_content: textContentToSave || null,
           meeting_id: newContent.meeting_id || null,
           created_by: userId
         })
@@ -112,6 +125,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
       alert('✅ Contenuto creato con successo!')
       setShowModal(false)
       setNewContent({ title: '', description: '', type: 'text', url: '', text_content: '', meeting_id: '' })
+      setMusicAudioUrl('')
       setImagePreview(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
       router.refresh()
@@ -338,13 +352,14 @@ export default function ContentClient({ contents, userId, meetings }: { contents
               {newContent.type === 'music' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Audio *</label>
                     <input
                       type="url"
-                      value={newContent.url}
-                      onChange={(e) => setNewContent({ ...newContent, url: e.target.value })}
+                      required
+                      value={musicAudioUrl}
+                      onChange={(e) => setMusicAudioUrl(e.target.value)}
                       className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                      placeholder="https://..."
+                      placeholder="https://example.com/audio.mp3"
                     />
                   </div>
                   <div>
@@ -410,7 +425,9 @@ export default function ContentClient({ contents, userId, meetings }: { contents
               onSubmit={async (e) => {
                 e.preventDefault()
                 try {
-                  let imageUrl = editContent.url
+                  let imageUrl = editContent.type === 'music' ? editContent.url : editContent.url
+                  let audioUrl = editContent.type === 'music' ? editMusicAudioUrl : ''
+                  
                   if ((editContent.type === 'image' || editContent.type === 'music') && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
                     setEditUploading(true)
                     const file = editFileInputRef.current.files[0]
@@ -429,6 +446,12 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     }
                     setEditUploading(false)
                   }
+                  
+                  let textContentToSave = editContent.text_content
+                  if (editContent.type === 'music' && audioUrl) {
+                    textContentToSave = `AUDIO_URL:${audioUrl}`
+                  }
+                  
                   const { error } = await supabase
                     .from('content')
                     .update({
@@ -436,7 +459,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                       description: editContent.description || null,
                       type: editContent.type,
                       url: imageUrl || null,
-                      text_content: editContent.text_content || null,
+                      text_content: textContentToSave || null,
                       meeting_id: editContent.meeting_id || null
                     })
                     .eq('id', editingContent.id)
@@ -445,6 +468,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   setEditModal(false)
                   setEditingContent(null)
                   setEditContent(null)
+                  setEditMusicAudioUrl('')
                   setEditImagePreview(null)
                   if (editFileInputRef.current) editFileInputRef.current.value = ''
                   router.refresh()
@@ -533,13 +557,13 @@ export default function ContentClient({ contents, userId, meetings }: { contents
               {editContent.type === 'music' && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Musica</label>
+                    <label className="block text-sm font-medium text-radianza-deep-blue mb-2">URL Audio</label>
                     <input
                       type="url"
-                      value={editContent.url || ''}
-                      onChange={e => setEditContent({ ...editContent, url: e.target.value })}
+                      value={editMusicAudioUrl || ''}
+                      onChange={e => setEditMusicAudioUrl(e.target.value)}
                       className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                      placeholder="https://..."
+                      placeholder="https://example.com/audio.mp3"
                     />
                   </div>
                   <div>

@@ -305,11 +305,17 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
         )}
 
         {/* Link audio/video */}
-        {content.url && content.type === 'music' && (
+        {content.type === 'music' && content.text_content && (
           <div className="mb-3">
-            <audio controls className="w-full">
-              <source src={content.url} />
-            </audio>
+            {content.text_content.startsWith('AUDIO_URL:') ? (
+              <audio controls className="w-full">
+                <source src={content.text_content.replace('AUDIO_URL:', '')} />
+              </audio>
+            ) : (
+              <audio controls className="w-full">
+                <source src={content.text_content} />
+              </audio>
+            )}
           </div>
         )}
 
