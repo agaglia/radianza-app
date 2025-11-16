@@ -26,9 +26,10 @@ CREATE TABLE IF NOT EXISTS content (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   title TEXT NOT NULL,
   description TEXT,
-  type TEXT NOT NULL CHECK (type IN ('video', 'photo', 'text', 'poem', 'letter')),
+  type TEXT NOT NULL CHECK (type IN ('video', 'photo', 'text', 'poem', 'letter', 'music', 'image', 'mantra', 'mediradiananza')),
   url TEXT,
   text_content TEXT,
+  meeting_id UUID REFERENCES meetings(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES profiles(id) ON DELETE SET NULL
 );
