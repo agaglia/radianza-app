@@ -247,6 +247,28 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
   getCategoryIcon: (type: string) => React.ReactNode,
   getCategoryName: (type: string) => string 
 }) {
+  // Funzione per estrarre ID video YouTube da URL
+  const extractYouTubeId = (url: string): string | null => {
+    const regexes = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/
+    ]
+    for (const regex of regexes) {
+      const match = url.match(regex)
+      if (match) return match[1]
+    }
+    return null
+  }
+
+  const isYouTubeUrl = (url: string): boolean => {
+    return /(?:youtube\.com|youtu\.be)/.test(url)
+  }
+
+  const youTubeId = content.type === 'music' && content.text_content?.startsWith('AUDIO_URL:')
+    ? extractYouTubeId(content.text_content.replace('AUDIO_URL:', ''))
+    : null
+
   return (
     <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg overflow-hidden border border-radianza-gold/30 hover:shadow-xl transition-all">
       {/* Immagine o Video */}
@@ -296,7 +318,7 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
         )}
 
         {/* Testo contenuto */}
-        {content.text_content && (
+        {content.text_content && !content.text_content.startsWith('AUDIO_URL:') && (
           <div className="bg-radianza-celestial/50 rounded-lg p-4 mb-3">
             <p className="text-radianza-deep-blue text-sm whitespace-pre-wrap">
               {content.text_content}
@@ -304,16 +326,35 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
           </div>
         )}
 
-        {/* Link audio/video */}
+        {/* Player audio/video YouTube */}
         {content.type === 'music' && content.text_content && (
           <div className="mb-3">
-            {content.text_content.startsWith('AUDIO_URL:') ? (
-              <audio controls className="w-full">
-                <source src={content.text_content.replace('AUDIO_URL:', '')} />
-              </audio>
+            {youTubeId ? (
+              <div className="space-y-2">
+                {/* Embedded YouTube */}
+                <iframe
+                  width="100%"
+                  height="200"
+                  src={`https://www.youtube.com/embed/${youTubeId}`}
+                  title={content.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-lg"
+                ></iframe>
+                {/* Link diretto a YouTube */}
+                <a
+                  href={content.text_content.replace('AUDIO_URL:', '')}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-sm text-radianza-sky-blue hover:underline"
+                >
+                  Ascolta su YouTube →
+                </a>
+              </div>
             ) : (
               <audio controls className="w-full">
-                <source src={content.text_content} />
+                <source src={content.text_content.replace('AUDIO_URL:', '')} />
               </audio>
             )}
           </div>
