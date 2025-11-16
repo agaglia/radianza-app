@@ -55,10 +55,16 @@ export default function ContentClient({ contents: initialContents, userId, meeti
   // Funzione per ricaricare i contenuti dal database
   const reloadContents = async () => {
     try {
-      const { data } = await supabase
+      console.log('🔄 Reloading contents from database...')
+      const { data, error } = await supabase
         .from('content')
         .select('*, meetings(*)')
         .order('created_at', { ascending: false })
+      if (error) {
+        console.error('❌ Error loading contents:', error)
+        return
+      }
+      console.log('✅ Loaded contents:', data)
       if (data) {
         setContents(data)
       }
@@ -480,21 +486,29 @@ export default function ContentClient({ contents: initialContents, userId, meeti
                     textContentToSave = audioUrl ? `AUDIO_URL:${audioUrl}` : editContent.text_content
                   }
                   
+                  const updatePayload = {
+                    title: editContent.title,
+                    description: editContent.description || null,
+                    type: editContent.type,
+                    url: imageUrl || null,
+                    text_content: textContentToSave || null,
+                    meeting_id: editContent.meeting_id || null
+                  }
+                  
+                  console.log('📤 Sending update to Supabase for ID:', editingContent.id)
+                  console.log('📝 Update payload:', updatePayload)
+                  
                   const { error } = await supabase
                     .from('content')
-                    .update({
-                      title: editContent.title,
-                      description: editContent.description || null,
-                      type: editContent.type,
-                      url: imageUrl || null,
-                      text_content: textContentToSave || null,
-                      meeting_id: editContent.meeting_id || null
-                    })
+                    .update(updatePayload)
                     .eq('id', editingContent.id)
                   
                   if (error) {
+                    console.error('❌ Supabase update error:', error)
                     throw error
                   }
+                  
+                  console.log('✅ Update successful, reloading contents...')
                   
                   // Aggiorna immediatamente lo stato locale con i dati salvati
                   setEditingContent(prev => prev ? {
