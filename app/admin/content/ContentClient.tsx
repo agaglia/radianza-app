@@ -433,7 +433,8 @@ export default function ContentClient({ contents, userId, meetings }: { contents
               onSubmit={async (e) => {
                 e.preventDefault()
                 try {
-                  let imageUrl = editContent.type === 'music' ? editContent.url : editContent.url
+                  // Se editContent.url è vuoto (nessun nuovo file), usa il vecchio URL
+                  let imageUrl = editContent.url || editingContent.url || null
                   let audioUrl = editContent.type === 'music' ? editMusicAudioUrl : ''
                   
                   if ((editContent.type === 'image' || editContent.type === 'music') && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
@@ -449,6 +450,8 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     const uploadData = await uploadRes.json()
                     if (uploadData.ok) {
                       imageUrl = uploadData.signedUrl
+                      // Aggiorna anche lo stato editContent con il nuovo URL
+                      setEditContent(prev => ({ ...prev, url: uploadData.signedUrl }))
                     } else {
                       throw new Error('Upload failed: ' + uploadData.message)
                     }
