@@ -49,6 +49,11 @@ export default function ContentClient({ contents, userId, meetings }: { contents
   const router = useRouter()
   const supabase = createClient()
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
   const categories = [
     { id: 'all', name: 'Tutti', icon: <FileText className="w-4 h-4" /> },
     { id: 'music', name: 'Musiche', icon: <Music className="w-4 h-4" /> },
@@ -146,13 +151,21 @@ export default function ContentClient({ contents, userId, meetings }: { contents
             <h1 className="text-3xl font-bold text-radianza-deep-blue">Gestione Contenuti</h1>
             <p className="text-radianza-deep-blue/60 mt-2">Organizza contenuti per categorie e incontri</p>
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Nuovo Contenuto</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowModal(true)}
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Nuovo Contenuto</span>
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
+            >
+              Esci
+            </button>
+          </div>
         </div>
 
         {/* Filtri per categoria */}
