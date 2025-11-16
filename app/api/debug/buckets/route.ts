@@ -9,27 +9,33 @@ export async function GET() {
   }
 
   try {
-    const requestUrl = `${SUPABASE_URL.replace(/\/$/, '')}/storage/v1/admin/buckets`
-    const res = await fetch(requestUrl, {
-      headers: {
-        'Authorization': `Bearer ${SERVICE_ROLE}`,
-        'Content-Type': 'application/json'
+    const base = SUPABASE_URL.replace(/\/$/, '')
+    const candidates = ['/storage/v1/admin/buckets', '/storage/v1/buckets']
+    const results: any[] = []
+
+    for (const path of candidates) {
+      const requestUrl = `${base}${path}`
+      try {
+        const res = await fetch(requestUrl, {
+          headers: {
+            'Authorization': `Bearer ${SERVICE_ROLE}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        const text = await res.text()
+        let parsed: any = null
+        try { parsed = JSON.parse(text) } catch (e) { parsed = text }
+        results.push({ path, requestUrl, status: res.status, body: parsed })
+        // if we got a successful response with buckets, return immediately
+        if (res.ok) {
+          return NextResponse.json({ ok: true, tried: results }, { status: 200 })
+        }
+      } catch (e: any) {
+        results.push({ path, requestUrl, error: e.message || String(e) })
       }
-    })
-
-    const text = await res.text()
-    let parsed: any = null
-    try {
-      parsed = JSON.parse(text)
-    } catch (e) {
-      parsed = text
     }
 
-    if (!res.ok) {
-      return NextResponse.json({ ok: false, requestUrl, status: res.status, body: parsed }, { status: 200 })
-    }
-
-    return NextResponse.json({ ok: true, requestUrl, status: res.status, buckets: parsed }, { status: 200 })
+    return NextResponse.json({ ok: false, tried: results }, { status: 200 })
   } catch (err: any) {
     return NextResponse.json({ ok: false, message: err.message || String(err) }, { status: 500 })
   }
