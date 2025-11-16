@@ -81,21 +81,18 @@ export default function ContentClient({ contents, userId, meetings }: { contents
       if (newContent.type === 'image' && fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
         setUploading(true)
         const file = fileInputRef.current.files[0]
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
-        const { data, error: uploadError } = await supabase.storage.from('content-images').upload(fileName, file)
-        if (uploadError) throw uploadError
-        // Ottieni signed URL dal server
-        const signedRes = await fetch('/api/storage/signed-download', {
+        const formData = new FormData()
+        formData.append('file', file)
+        // Upload via server (uses Service Role Key)
+        const uploadRes = await fetch('/api/storage/signed-upload', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filePath: fileName })
+          body: formData
         })
-        const signedData = await signedRes.json()
-        if (signedData.ok) {
-          imageUrl = signedData.signedUrl
+        const uploadData = await uploadRes.json()
+        if (uploadData.ok) {
+          imageUrl = uploadData.signedUrl
         } else {
-          throw new Error('Failed to get signed URL: ' + signedData.message)
+          throw new Error('Upload failed: ' + uploadData.message)
         }
         setUploading(false)
       }
@@ -441,20 +438,18 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   if (editContent.type === 'image' && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
                     setEditUploading(true)
                     const file = editFileInputRef.current.files[0]
-                    const fileExt = file.name.split('.').pop()
-                    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
-                    const { data, error: uploadError } = await supabase.storage.from('content-images').upload(fileName, file)
-                    if (uploadError) throw uploadError
-                    const signedRes = await fetch('/api/storage/signed-download', {
+                    const formData = new FormData()
+                    formData.append('file', file)
+                    // Upload via server (uses Service Role Key)
+                    const uploadRes = await fetch('/api/storage/signed-upload', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ filePath: fileName })
+                      body: formData
                     })
-                    const signedData = await signedRes.json()
-                    if (signedData.ok) {
-                      imageUrl = signedData.signedUrl
+                    const uploadData = await uploadRes.json()
+                    if (uploadData.ok) {
+                      imageUrl = uploadData.signedUrl
                     } else {
-                      throw new Error('Failed to get signed URL: ' + signedData.message)
+                      throw new Error('Upload failed: ' + uploadData.message)
                     }
                     setEditUploading(false)
                   }

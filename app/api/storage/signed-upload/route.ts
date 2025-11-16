@@ -3,10 +3,11 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function POST(req: Request) {
   try {
-    const { fileName, fileType } = await req.json()
+    const formData = await req.formData()
+    const file = formData.get('file') as File
 
-    if (!fileName || !fileType) {
-      return NextResponse.json({ ok: false, message: 'Missing fileName or fileType' }, { status: 400 })
+    if (!file) {
+      return NextResponse.json({ ok: false, message: 'Missing file' }, { status: 400 })
     }
 
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -20,22 +21,33 @@ export async function POST(req: Request) {
       auth: { persistSession: false }
     })
 
-    // Generate signed upload URL (valid for 1 hour)
-    const { data, error } = await supabase.storage
+    // Generate unique filename
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
+
+    // Upload file using Service Role Key (server-side)
+    const buffer = await file.arrayBuffer()
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from('content-images')
-      .createSignedUrl(fileName, 3600, {
-        transform: {
-          width: 800,
-          height: 800,
-          resize: 'contain'
-        }
+      .upload(fileName, buffer, {
+        contentType: file.type,
+        upsert: false
       })
 
-    if (error) {
-      return NextResponse.json({ ok: false, message: error.message }, { status: 500 })
+    if (uploadError) {
+      return NextResponse.json({ ok: false, message: uploadError.message }, { status: 500 })
     }
 
-    return NextResponse.json({ ok: true, signedUrl: data.signedUrl })
+    // Generate signed download URL (valid for 1 hour)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from('content-images')
+      .createSignedUrl(fileName, 3600)
+
+    if (signedError) {
+      return NextResponse.json({ ok: false, message: signedError.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ ok: true, fileName, signedUrl: signedData.signedUrl })
   } catch (err: any) {
     return NextResponse.json({ ok: false, message: err.message || String(err) }, { status: 500 })
   }
