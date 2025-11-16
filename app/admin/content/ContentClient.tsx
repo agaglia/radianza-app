@@ -377,55 +377,6 @@ export default function ContentClient({ contents, userId, meetings }: { contents
         </div>
       )}
 
-      <div className="mt-6">
-        <div className="text-sm text-radianza-deep-blue/60 mb-2">Supabase: <code className="font-mono">{process.env.NEXT_PUBLIC_SUPABASE_URL}</code></div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={async () => {
-              try {
-                const res = await fetch('/api/debug/buckets')
-                const data = await res.json()
-                if (!data.ok) {
-                  alert('Debug error: ' + (data.message || JSON.stringify(data)))
-                  console.error('debug buckets:', data)
-                  return
-                }
-                alert(`Buckets:\n${JSON.stringify(data.buckets, null, 2).slice(0, 200)}...`)
-                console.log('Buckets full:', data.buckets)
-              } catch (err) {
-                alert('Errore chiamando API debug: ' + String(err))
-                console.error(err)
-              }
-            }}
-            className="px-3 py-2 bg-white border border-radianza-gold/30 rounded-lg text-radianza-deep-blue hover:bg-radianza-gold/10 transition-colors"
-          >
-            Debug Buckets
-          </button>
-          <button
-            onClick={async () => {
-              try {
-                const res = await fetch('/api/debug/create-bucket?name=content-images')
-                const data = await res.json()
-                if (!data.ok) {
-                  alert('Create bucket response:\n' + JSON.stringify(data.tried || data, null, 2).slice(0, 400))
-                  console.error('create bucket:', data)
-                  return
-                }
-                alert('Bucket creato (o esistente):\n' + JSON.stringify(data.tried || data, null, 2).slice(0, 400))
-                console.log('Create bucket full:', data.tried || data)
-              } catch (err) {
-                alert('Errore chiamando API create-bucket: ' + String(err))
-                console.error(err)
-              }
-            }}
-            className="px-3 py-2 bg-white border border-radianza-gold/30 rounded-lg text-radianza-deep-blue hover:bg-radianza-gold/10 transition-colors"
-          >
-            Create Bucket
-          </button>
-          <div className="text-xs text-radianza-deep-blue/50">Bucket target: <code className="font-mono">content-images</code></div>
-        </div>
-      </div>
-
       {editModal && editingContent && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 my-8">
