@@ -85,9 +85,18 @@ export default function ContentClient({ contents, userId, meetings }: { contents
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
         const { data, error: uploadError } = await supabase.storage.from('content-images').upload(fileName, file)
         if (uploadError) throw uploadError
-        // Ottieni URL pubblico
-        const { data: publicUrlData } = supabase.storage.from('content-images').getPublicUrl(fileName)
-        imageUrl = publicUrlData.publicUrl
+        // Ottieni signed URL dal server
+        const signedRes = await fetch('/api/storage/signed-download', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filePath: fileName })
+        })
+        const signedData = await signedRes.json()
+        if (signedData.ok) {
+          imageUrl = signedData.signedUrl
+        } else {
+          throw new Error('Failed to get signed URL: ' + signedData.message)
+        }
         setUploading(false)
       }
       const { error } = await supabase
@@ -436,8 +445,17 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`
                     const { data, error: uploadError } = await supabase.storage.from('content-images').upload(fileName, file)
                     if (uploadError) throw uploadError
-                    const { data: publicUrlData } = supabase.storage.from('content-images').getPublicUrl(fileName)
-                    imageUrl = publicUrlData.publicUrl
+                    const signedRes = await fetch('/api/storage/signed-download', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ filePath: fileName })
+                    })
+                    const signedData = await signedRes.json()
+                    if (signedData.ok) {
+                      imageUrl = signedData.signedUrl
+                    } else {
+                      throw new Error('Failed to get signed URL: ' + signedData.message)
+                    }
                     setEditUploading(false)
                   }
                   const { error } = await supabase
