@@ -452,7 +452,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     if (uploadData.ok) {
                       imageUrl = uploadData.signedUrl
                       // Aggiorna anche lo stato editContent con il nuovo URL
-                      setEditContent(prev => ({ ...prev, url: uploadData.signedUrl }))
+                      setEditContent((prev: any) => ({ ...prev, url: uploadData.signedUrl }))
                     } else {
                       throw new Error('Upload failed: ' + uploadData.message)
                     }
