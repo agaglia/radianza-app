@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, FileText, Image, Music, Mail, Book, Sparkles, Calendar } from 'lucide-react'
+import { Plus, Trash2, FileText, Image, Music, Mail, Book, Sparkles, Calendar, Wand2 } from 'lucide-react'
 
 interface Meeting {
   id: string
@@ -15,7 +15,7 @@ interface Content {
   id: string
   title: string
   description: string | null
-  type: 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra'
+  type: 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra' | 'mediradiananza'
   url: string | null
   text_content: string | null
   meeting_id: string | null
@@ -29,7 +29,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
   const [newContent, setNewContent] = useState({
     title: '',
     description: '',
-    type: 'text' as 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra',
+    type: 'text' as 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra' | 'mediradiananza',
     url: '',
     text_content: '',
     meeting_id: ''
@@ -56,7 +56,8 @@ export default function ContentClient({ contents, userId, meetings }: { contents
     { id: 'text', name: 'Testi', icon: <FileText className="w-4 h-4" /> },
     { id: 'poem', name: 'Poesie', icon: <Book className="w-4 h-4" /> },
     { id: 'image', name: 'Immagini', icon: <Image className="w-4 h-4" /> },
-    { id: 'mantra', name: 'Mantra', icon: <Sparkles className="w-4 h-4" /> }
+    { id: 'mantra', name: 'Mantra', icon: <Sparkles className="w-4 h-4" /> },
+    { id: 'mediradiananza', name: 'MediRadianza', icon: <Wand2 className="w-4 h-4" /> }
   ]
 
   const getIcon = (type: string) => {
@@ -281,6 +282,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   <option value="poem">Poesie</option>
                   <option value="image">Immagini</option>
                   <option value="mantra">Mantra</option>
+                  <option value="mediradiananza">MediRadianza</option>
                 </select>
               </div>
               <div>
@@ -345,7 +347,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   />
                 </div>
               )}
-              {(newContent.type === 'text' || newContent.type === 'poem' || newContent.type === 'letter' || newContent.type === 'mantra') && (
+              {(newContent.type === 'text' || newContent.type === 'poem' || newContent.type === 'letter' || newContent.type === 'mantra' || newContent.type === 'mediradiananza') && (
                 <div>
                   <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Contenuto Testuale</label>
                   <textarea
@@ -454,6 +456,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   <option value="poem">Poesie</option>
                   <option value="image">Immagini</option>
                   <option value="mantra">Mantra</option>
+                  <option value="mediradiananza">MediRadianza</option>
                 </select>
               </div>
               <div>
@@ -516,7 +519,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   />
                 </div>
               )}
-              {(editContent.type === 'text' || editContent.type === 'poem' || editContent.type === 'letter' || editContent.type === 'mantra') && (
+              {(editContent.type === 'text' || editContent.type === 'poem' || editContent.type === 'letter' || editContent.type === 'mantra' || editContent.type === 'mediradiananza') && (
                 <div>
                   <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Contenuto Testuale</label>
                   <textarea

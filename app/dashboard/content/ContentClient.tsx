@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Music, Mail, FileText, BookOpen, Image as ImageIcon, Sparkles, Calendar, Filter } from 'lucide-react'
+import { Music, Mail, FileText, BookOpen, Image as ImageIcon, Sparkles, Calendar, Filter, Wand2 } from 'lucide-react'
 
 interface Meeting {
   id: string
@@ -13,7 +13,7 @@ interface Content {
   id: string
   title: string
   description: string | null
-  type: 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra'
+  type: 'music' | 'letter' | 'text' | 'poem' | 'image' | 'mantra' | 'mediradiananza'
   url: string | null
   text_content: string | null
   created_at: string
@@ -27,7 +27,8 @@ const categories = [
   { id: 'text', name: 'Testi', icon: FileText },
   { id: 'poem', name: 'Poesie', icon: BookOpen },
   { id: 'image', name: 'Immagini', icon: ImageIcon },
-  { id: 'mantra', name: 'Mantra', icon: Sparkles }
+  { id: 'mantra', name: 'Mantra', icon: Sparkles },
+  { id: 'mediradiananza', name: 'MediRadianza', icon: Wand2 }
 ]
 
 export default function ContentClient({ contents }: { contents: Content[] }) {
