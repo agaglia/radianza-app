@@ -228,7 +228,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
-                    {/* Modal Modifica */}
+                    {/* Modal Modifica (fuori dal ciclo) */}
                     {editModal && editingContent && (
                       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
                         <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 my-8">
