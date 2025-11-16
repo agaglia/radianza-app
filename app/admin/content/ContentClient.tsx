@@ -395,6 +395,27 @@ export default function ContentClient({ contents, userId, meetings }: { contents
           >
             Debug Buckets
           </button>
+          <button
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/debug/create-bucket?name=content-images')
+                const data = await res.json()
+                if (!data.ok) {
+                  alert('Create bucket response:\n' + JSON.stringify(data.tried || data, null, 2).slice(0, 400))
+                  console.error('create bucket:', data)
+                  return
+                }
+                alert('Bucket creato (o esistente):\n' + JSON.stringify(data.tried || data, null, 2).slice(0, 400))
+                console.log('Create bucket full:', data.tried || data)
+              } catch (err) {
+                alert('Errore chiamando API create-bucket: ' + String(err))
+                console.error(err)
+              }
+            }}
+            className="px-3 py-2 bg-white border border-radianza-gold/30 rounded-lg text-radianza-deep-blue hover:bg-radianza-gold/10 transition-colors"
+          >
+            Create Bucket
+          </button>
           <div className="text-xs text-radianza-deep-blue/50">Bucket target: <code className="font-mono">content-images</code></div>
         </div>
       </div>
