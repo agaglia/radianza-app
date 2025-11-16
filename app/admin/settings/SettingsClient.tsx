@@ -1,9 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, Save, Mail, Palette, Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Settings, Save, Mail, Palette, Info, LogOut } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function SettingsClient() {
+  const router = useRouter()
+  const supabase = createClient()
+  
   const [settings, setSettings] = useState({
     groupName: 'Radianza',
     emailFrom: 'noreply@radianza.org',
@@ -22,6 +27,11 @@ export default function SettingsClient() {
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
     alert('✅ Impostazioni salvate!')
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
   }
 
   return (
@@ -156,8 +166,15 @@ export default function SettingsClient() {
             </div>
           </div>
 
-          {/* Pulsante Salva */}
-          <div className="flex justify-end">
+          {/* Pulsante Salva e Logout */}
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
+            >
+              <LogOut className="w-5 h-5" />
+              <span>Esci</span>
+            </button>
             <button
               onClick={handleSave}
               className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
