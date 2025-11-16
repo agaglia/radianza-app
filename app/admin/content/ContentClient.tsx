@@ -425,13 +425,14 @@ export default function ContentClient({ contents, userId, meetings }: { contents
         </div>
       )}
 
-      {editModal && editingContent && (
+      {editModal && editingContent && editContent && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8 my-8">
             <h2 className="text-2xl font-bold text-radianza-deep-blue mb-6">Modifica Contenuto</h2>
             <form
               onSubmit={async (e) => {
                 e.preventDefault()
+                console.log('Saving edit content:', editContent)
                 try {
                   // Se editContent.url è vuoto (nessun nuovo file), usa il vecchio URL
                   let imageUrl = editContent.url || editingContent.url || null
@@ -475,7 +476,11 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                       meeting_id: editContent.meeting_id || null
                     })
                     .eq('id', editingContent.id)
-                  if (error) throw error
+                  if (error) {
+                    console.error('Update error:', error)
+                    throw error
+                  }
+                  console.log('Content updated successfully')
                   
                   // Aggiorna immediatamente lo stato locale con i dati salvati
                   setEditingContent(prev => prev ? {
