@@ -37,9 +37,18 @@ export default function SettingsClient() {
   return (
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-radianza-deep-blue">Impostazioni Generali</h1>
-          <p className="text-radianza-deep-blue/60 mt-2">Configura le impostazioni dell'applicazione</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-radianza-deep-blue">Impostazioni Generali</h1>
+            <p className="text-radianza-deep-blue/60 mt-2">Configura le impostazioni dell'applicazione</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-2 px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
+          >
+            <LogOut className="w-5 h-5" />
+            <span>Esci</span>
+          </button>
         </div>
 
         <div className="space-y-6">
@@ -166,15 +175,8 @@ export default function SettingsClient() {
             </div>
           </div>
 
-          {/* Pulsante Salva e Logout */}
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-2 px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors font-medium"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Esci</span>
-            </button>
+          {/* Pulsante Salva */}
+          <div className="flex justify-end">
             <button
               onClick={handleSave}
               className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
