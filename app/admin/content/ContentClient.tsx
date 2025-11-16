@@ -78,8 +78,8 @@ export default function ContentClient({ contents, userId, meetings }: { contents
     e.preventDefault()
     try {
       let imageUrl = newContent.url
-      // Se il tipo è image e c'è un file selezionato, carica su Supabase Storage
-      if (newContent.type === 'image' && fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
+      // Se il tipo è image o music e c'è un file selezionato, carica su Supabase Storage
+      if ((newContent.type === 'image' || newContent.type === 'music') && fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
         setUploading(true)
         const file = fileInputRef.current.files[0]
         const formData = new FormData()
@@ -411,7 +411,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                 e.preventDefault()
                 try {
                   let imageUrl = editContent.url
-                  if (editContent.type === 'image' && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
+                  if ((editContent.type === 'image' || editContent.type === 'music') && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
                     setEditUploading(true)
                     const file = editFileInputRef.current.files[0]
                     const formData = new FormData()
