@@ -505,10 +505,13 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   
                   alert('✅ Contenuto aggiornato!')
                   setEditModal(false)
-                  setEditingContent(null)
-                  setEditContent(null)
-                  setEditMusicAudioUrl('')
-                  setEditImagePreview(null)
+                  // Resetta gli stati dopo aver chiuso il modal
+                  setTimeout(() => {
+                    setEditingContent(null)
+                    setEditContent(null)
+                    setEditMusicAudioUrl('')
+                    setEditImagePreview(null)
+                  }, 100)
                   if (editFileInputRef.current) editFileInputRef.current.value = ''
                   router.refresh()
                 } catch (error: any) {
