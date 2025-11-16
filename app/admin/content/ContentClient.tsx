@@ -432,14 +432,10 @@ export default function ContentClient({ contents, userId, meetings }: { contents
             <form
               onSubmit={async (e) => {
                 e.preventDefault()
-                console.log('Saving edit content:', editContent)
-                console.log('Editing content ID:', editingContent?.id)
                 try {
                   // Se editContent.url è vuoto (nessun nuovo file), usa il vecchio URL
                   let imageUrl = editContent.url || editingContent.url || null
                   let audioUrl = editContent.type === 'music' ? editMusicAudioUrl : ''
-                  
-                  console.log('Before save - imageUrl:', imageUrl, 'audioUrl:', audioUrl)
                   
                   if ((editContent.type === 'image' || editContent.type === 'music') && editFileInputRef.current && editFileInputRef.current.files && editFileInputRef.current.files[0]) {
                     setEditUploading(true)
@@ -454,7 +450,6 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     const uploadData = await uploadRes.json()
                     if (uploadData.ok) {
                       imageUrl = uploadData.signedUrl
-                      console.log('File uploaded, new URL:', imageUrl)
                       // Aggiorna anche lo stato editContent con il nuovo URL
                       setEditContent((prev: any) => ({ ...prev, url: uploadData.signedUrl }))
                     } else {
@@ -469,28 +464,21 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     textContentToSave = audioUrl ? `AUDIO_URL:${audioUrl}` : editContent.text_content
                   }
                   
-                  const updateData = {
-                    title: editContent.title,
-                    description: editContent.description || null,
-                    type: editContent.type,
-                    url: imageUrl || null,
-                    text_content: textContentToSave || null,
-                    meeting_id: editContent.meeting_id || null
-                  }
-                  console.log('Sending to Supabase:', updateData)
-                  
-                  const { data, error } = await supabase
+                  const { error } = await supabase
                     .from('content')
-                    .update(updateData)
+                    .update({
+                      title: editContent.title,
+                      description: editContent.description || null,
+                      type: editContent.type,
+                      url: imageUrl || null,
+                      text_content: textContentToSave || null,
+                      meeting_id: editContent.meeting_id || null
+                    })
                     .eq('id', editingContent.id)
                   
-                  console.log('Supabase response - data:', data, 'error:', error)
-                  
                   if (error) {
-                    console.error('Update error:', error)
                     throw error
                   }
-                  console.log('Content updated successfully')
                   
                   // Aggiorna immediatamente lo stato locale con i dati salvati
                   setEditingContent(prev => prev ? {
