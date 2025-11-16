@@ -473,6 +473,18 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                     })
                     .eq('id', editingContent.id)
                   if (error) throw error
+                  
+                  // Aggiorna immediatamente lo stato locale con i dati salvati
+                  setEditingContent(prev => prev ? {
+                    ...prev,
+                    title: editContent.title,
+                    description: editContent.description || null,
+                    type: editContent.type,
+                    url: imageUrl || null,
+                    text_content: textContentToSave || null,
+                    meeting_id: editContent.meeting_id || null
+                  } : null)
+                  
                   alert('✅ Contenuto aggiornato!')
                   setEditModal(false)
                   setEditingContent(null)
