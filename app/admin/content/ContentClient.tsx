@@ -384,8 +384,7 @@ export default function ContentClient({ contents, userId, meetings }: { contents
                   console.error('debug buckets:', data)
                   return
                 }
-                alert('Buckets:
-' + JSON.stringify(data.buckets, null, 2).slice(0, 200) + '...')
+                alert(`Buckets:\n${JSON.stringify(data.buckets, null, 2).slice(0, 200)}...`)
                 console.log('Buckets full:', data.buckets)
               } catch (err) {
                 alert('Errore chiamando API debug: ' + String(err))
