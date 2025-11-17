@@ -1,52 +1,69 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase/server'
 
-// Creiamo il transporter in modo dinamico
-let transporter: nodemailer.Transporter | null = null
+// Variabili globali per OAuth2
+let oauth2Client: any = null
+
+async function getOAuth2Client() {
+  if (oauth2Client) return oauth2Client
+
+  const oauth2 = google.auth.OAuth2
+
+  oauth2Client = new oauth2({
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
+  })
+
+  // Imposta il refresh token (se disponibile)
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+  })
+
+  return oauth2Client
+}
 
 async function getTransporter() {
-  if (transporter) return transporter
-
-  // Prova a leggere da Supabase prima
   try {
-    const supabase = await createClient()
-    const { data: setting } = await supabase
-      .from('app_settings')
-      .select('value')
-      .eq('key', 'gmail_config')
-      .single()
-
-    if (setting?.value) {
-      const { gmailUser, gmailPassword } = setting.value
-      if (gmailUser && gmailPassword) {
-        console.log('📧 Uso credenziali Gmail da Supabase')
-        return nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: gmailUser,
-            pass: gmailPassword
-          }
-        })
-      }
-    }
-  } catch (err) {
-    console.log('⚠️ Supabase non disponibile, provo .env')
-  }
-
-  // Fallback a .env
-  if (process.env.GMAIL_USER && process.env.GMAIL_PASSWORD) {
-    console.log('📧 Uso credenziali Gmail da .env.local')
-    return nodemailer.createTransport({
+    // Prova OAuth2
+    const oauth2Client = await getOAuth2Client()
+    
+    // Ottieni l'access token
+    const { credentials } = await oauth2Client.refreshAccessToken()
+    
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
+        type: 'OAuth2',
         user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASSWORD
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        accessToken: credentials.access_token,
+        expires: credentials.expiry_date
       }
     })
-  }
 
-  throw new Error('Credenziali Gmail non configurate')
+    console.log('📧 Uso OAuth2 di Google')
+    return transporter
+  } catch (err) {
+    console.log('⚠️ OAuth2 non disponibile, provo credenziali .env')
+    
+    // Fallback a credenziali semplici da .env (per dev)
+    if (process.env.GMAIL_USER && process.env.GMAIL_PASSWORD) {
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER,
+          pass: process.env.GMAIL_PASSWORD
+        }
+      })
+    }
+
+    throw new Error('Credenziali Gmail non configurate')
+  }
 }
 
 export async function POST(request: Request) {
@@ -122,24 +139,14 @@ export async function POST(request: Request) {
 export async function GET() {
   return NextResponse.json({
     message: 'API Email Radianza',
-    version: '2.0.0',
-    provider: 'Gmail + Nodemailer',
-    endpoints: {
-      POST: {
-        description: 'Invia email a destinatari multipli',
-        body: {
-          recipients: ['email1@example.com', 'email2@example.com'],
-          subject: 'Oggetto email',
-          message: 'Messaggio in plain text',
-          html: '(opzionale) Messaggio in HTML'
-        },
-        required: ['recipients', 'subject', 'message']
-      }
-    },
-    environment: {
-      GMAIL_USER: process.env.GMAIL_USER ? '✅ Configurato' : '❌ Non configurato',
-      GMAIL_PASSWORD: process.env.GMAIL_PASSWORD ? '✅ Configurato' : '❌ Non configurato',
-      GMAIL_FROM: process.env.GMAIL_FROM || '❌ Non configurato'
+    version: '3.0.0',
+    provider: 'Gmail + OAuth2',
+    configuration: {
+      GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ? '✅' : '❌',
+      GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ? '✅' : '❌',
+      GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN ? '✅' : '❌',
+      GMAIL_USER: process.env.GMAIL_USER ? '✅' : '❌',
+      GMAIL_FROM: process.env.GMAIL_FROM ? '✅' : '❌'
     }
   })
 }
