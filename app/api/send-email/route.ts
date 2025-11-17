@@ -111,7 +111,10 @@ export async function POST(request: Request) {
 
     // Invia email
     const info = await transporter.sendMail({
-      from: fromEmail,
+      from: {
+        name: 'Radianza',
+        address: process.env.GMAIL_USER || 'centri.isocu.test@gmail.com'
+      },
       to: recipients.join(', '),
       subject: subject,
       html: emailHtml,
