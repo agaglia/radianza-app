@@ -23,17 +23,27 @@ export const MESSAGE_TEMPLATES: MessageTemplate[] = [
 
 Ti comunichiamo che l'incontro di Radianza è programmato come segue:
 
-📅 Data e Ora: {eventDateTime}
-👨‍🏫 Conduttore/a: {organizerName}
-📚 Argomento: {topic}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 DATA E ORA
+{eventDateTime}
 
-LINK PER L'ACCESSO:
-🔗 {meetLink1}
+👨‍🏫 CONDUTTORE/A
+{organizerName}
 
-✅ NON è necessaria alcuna registrazione preventiva. Puoi accedere direttamente dal link.
+📚 ARGOMENTO
+{topic}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔗 LINK PER L'ACCESSO
+{meetLink1}
+
+✅ NON è necessaria alcuna registrazione preventiva.
+Puoi accedere direttamente dal link cliccando sopra.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 Per eventuali problemi o domande:
-📧 Contattaci: {replyToEmail}
+📧 {replyToEmail}
 
 A presto sull'incontro!
 
