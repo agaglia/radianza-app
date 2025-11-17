@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Music, Mail, FileText, BookOpen, Image as ImageIcon, Sparkles, Calendar, Filter, Wand2 } from 'lucide-react'
+import { Music, Mail, FileText, BookOpen, Image as ImageIcon, Sparkles, Calendar, Filter, Wand2, X } from 'lucide-react'
 
 interface Meeting {
   id: string
@@ -34,6 +34,7 @@ const categories = [
 export default function ContentClient({ contents }: { contents: Content[] }) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedMeeting, setSelectedMeeting] = useState<string>('all')
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   // Ordina i contenuti per data di incontro (più recenti prima)
   const sortedContents = [...contents].sort((a, b) => {
@@ -199,7 +200,7 @@ export default function ContentClient({ contents }: { contents: Content[] }) {
                     {/* Griglia contenuti */}
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {meetingContents.map((content) => (
-                        <ContentCard key={content.id} content={content} getCategoryIcon={getCategoryIcon} getCategoryName={getCategoryName} />
+                        <ContentCard key={content.id} content={content} getCategoryIcon={getCategoryIcon} getCategoryName={getCategoryName} onImageClick={setSelectedImage} />
                       ))}
                     </div>
                   </div>
@@ -222,7 +223,7 @@ export default function ContentClient({ contents }: { contents: Content[] }) {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {contentsWithoutMeeting.map((content) => (
-                    <ContentCard key={content.id} content={content} getCategoryIcon={getCategoryIcon} getCategoryName={getCategoryName} />
+                    <ContentCard key={content.id} content={content} getCategoryIcon={getCategoryIcon} getCategoryName={getCategoryName} onImageClick={setSelectedImage} />
                   ))}
                 </div>
               </div>
@@ -237,15 +238,41 @@ export default function ContentClient({ contents }: { contents: Content[] }) {
           </div>
         )}
       </div>
+
+      {/* Modal per immagini ingrandite */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div 
+            className="max-w-4xl w-full max-h-[90vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="self-end mb-4 p-2 bg-white rounded-full hover:bg-radianza-gold/20 transition-colors"
+            >
+              <X className="w-6 h-6 text-radianza-deep-blue" />
+            </button>
+            <img
+              src={selectedImage}
+              alt="Immagine ingrandita"
+              className="w-full h-full object-contain rounded-lg"
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 // Componente per la card del contenuto
-function ContentCard({ content, getCategoryIcon, getCategoryName }: { 
+function ContentCard({ content, getCategoryIcon, getCategoryName, onImageClick }: { 
   content: Content, 
   getCategoryIcon: (type: string) => React.ReactNode,
-  getCategoryName: (type: string) => string 
+  getCategoryName: (type: string) => string,
+  onImageClick: (url: string) => void
 }) {
   // Funzione per estrarre ID video YouTube da URL
   const extractYouTubeId = (url: string): string | null => {
@@ -278,13 +305,15 @@ function ContentCard({ content, getCategoryIcon, getCategoryName }: {
             <img
               src={content.url}
               alt={content.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => onImageClick(content.url!)}
             />
           ) : content.type === 'music' ? (
             <img
               src={content.url}
               alt={content.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => onImageClick(content.url!)}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
