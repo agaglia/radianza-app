@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Solo admin' }, { status: 403 })
     }
 
-    const { resendApiKey, emailFrom } = await request.json()
+    const { resendApiKey, emailFrom, replyToEmail } = await request.json()
 
     if (!resendApiKey) {
       return NextResponse.json(
@@ -39,6 +39,7 @@ export async function POST(request: Request) {
           value: {
             resendApiKey,
             emailFrom: emailFrom || 'onboarding@resend.dev',
+            replyToEmail: replyToEmail || 'noreply@radianza.org',
             provider: 'Resend',
             updatedAt: new Date().toISOString()
           },

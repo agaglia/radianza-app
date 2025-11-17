@@ -13,6 +13,7 @@ export default function SettingsClient() {
     groupName: 'Radianza',
     emailFrom: 'noreply@radianza.org',
     resendApiKey: '',
+    replyToEmail: 'centri.isocu.test@gmail.com',
     primaryColor: '#D4AF37',
     secondaryColor: '#1a237e',
     logoUrl: ''
@@ -32,7 +33,8 @@ export default function SettingsClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resendApiKey: settings.resendApiKey,
-          emailFrom: settings.emailFrom
+          emailFrom: settings.emailFrom,
+          replyToEmail: settings.replyToEmail
         })
       })
 
@@ -214,6 +216,20 @@ export default function SettingsClient() {
                 />
                 <p className="text-xs text-radianza-deep-blue/60 mt-1">
                   Nome visualizzato nelle email (es. Radianza &lt;noreply@radianza.org&gt;)
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Email per le Risposte (Reply-To)</label>
+                <input
+                  type="email"
+                  value={settings.replyToEmail}
+                  onChange={(e) => setSettings({ ...settings, replyToEmail: e.target.value })}
+                  placeholder="support@radianza.org"
+                  className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                />
+                <p className="text-xs text-radianza-deep-blue/60 mt-1">
+                  L'indirizzo email dove verranno ricevute le risposte agli utenti. (Es: centri.isocu.test@gmail.com)
                 </p>
               </div>
 

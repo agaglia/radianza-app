@@ -18,7 +18,7 @@ function getResendClient() {
 
 export async function POST(request: Request) {
   try {
-    const { recipients, subject, message, html } = await request.json()
+    const { recipients, subject, message, html, replyTo } = await request.json()
 
     // Validazione input
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
@@ -43,12 +43,20 @@ export async function POST(request: Request) {
     console.log('📧 Invio email a:', recipients)
 
     // Invia email con Resend
-    const data = await resend.emails.send({
+    const emailConfig: any = {
       from: 'Radianza <onboarding@resend.dev>',
       to: recipients,
       subject: subject,
       html: emailHtml
-    })
+    }
+
+    // Aggiungi reply-to se fornito
+    if (replyTo) {
+      emailConfig.replyTo = replyTo
+      console.log('↩️  Reply-To configurato:', replyTo)
+    }
+
+    const data = await resend.emails.send(emailConfig)
 
     if (data.error) {
       throw new Error(data.error.message)
