@@ -22,6 +22,7 @@ interface Template {
   type: 'email' | 'whatsapp'
   subject?: string
   body: string
+  htmlBody?: string
 }
 
 export default function MessagesClient({ meetings, users }: { meetings: Meeting[], users: User[] }) {
@@ -44,6 +45,7 @@ export default function MessagesClient({ meetings, users }: { meetings: Meeting[
   const [selectedEmailMeeting, setSelectedEmailMeeting] = useState<Meeting | null>(null)
   const [emailSending, setEmailSending] = useState(false)
   const [emailMessage, setEmailMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [emailHtml, setEmailHtml] = useState('') // Store HTML version of email
 
   const defaultTemplates: Template[] = [
     {
@@ -202,6 +204,7 @@ Radianza`
     setSelectedEmailTemplate(template)
     setEmailSubject(template.subject || '')
     setEmailBody(template.body)
+    setEmailHtml(template.htmlBody || template.body) // Use HTML if available
   }
 
   const handleSendEmail = async () => {
@@ -244,6 +247,13 @@ Radianza`
         .replace(/{data_incontro}/g, date)
         .replace(/{ora_incontro}/g, time)
 
+      // Also replace variables in HTML if available
+      let html = emailHtml
+        .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
+        .replace(/{descrizione_incontro}/g, selectedEmailMeeting.description || '')
+        .replace(/{data_incontro}/g, date)
+        .replace(/{ora_incontro}/g, time)
+
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -251,7 +261,7 @@ Radianza`
           recipients,
           subject,
           message: body,
-          html: body // Send plain HTML, not escaped
+          html: html // Send HTML version if available
         })
       })
 
@@ -265,6 +275,7 @@ Radianza`
       setTimeout(() => {
         setEmailSubject('')
         setEmailBody('')
+        setEmailHtml('')
         setSelectedEmailUsers([])
         setSelectedEmailMeeting(null)
         setSelectedEmailTemplate(null)
