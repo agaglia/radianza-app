@@ -411,6 +411,12 @@ Radianza`
       const eventDateTime = `${date} ore ${time}`
       const meetLink1 = selectedEmailMeeting.meet_link || ''
       const meetLink2 = selectedEmailMeeting.meet_link_2 || ''
+      
+      console.log('📧 DEBUG EMAIL:', {
+        meetLink1,
+        meetLink2,
+        meeting: selectedEmailMeeting
+      })
 
       let subject = emailSubject
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
