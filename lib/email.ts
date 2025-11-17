@@ -7,6 +7,7 @@ export interface EmailOptions {
   subject: string
   message: string
   html?: string
+  replyTo?: string
 }
 
 export interface EmailResponse {
@@ -14,6 +15,20 @@ export interface EmailResponse {
   message?: string
   error?: string
   recipients?: number
+}
+
+/**
+ * Get email reply-to from Supabase settings
+ */
+async function getReplyToEmail(): Promise<string | undefined> {
+  try {
+    const response = await fetch('/api/email-config')
+    const data = await response.json()
+    return data.replyToEmail
+  } catch (error) {
+    console.warn('Could not get reply-to email from settings:', error)
+    return undefined
+  }
 }
 
 /**
@@ -25,17 +40,26 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResponse> {
   try {
     const recipients = Array.isArray(options.to) ? options.to : [options.to]
 
+    // Se non è specificato il replyTo, recuperalo dalle impostazioni
+    const replyTo = options.replyTo || (await getReplyToEmail())
+
+    const body: any = {
+      recipients,
+      subject: options.subject,
+      message: options.message,
+      html: options.html
+    }
+
+    if (replyTo) {
+      body.replyTo = replyTo
+    }
+
     const response = await fetch('/api/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        recipients,
-        subject: options.subject,
-        message: options.message,
-        html: options.html
-      })
+      body: JSON.stringify(body)
     })
 
     const data = await response.json()
