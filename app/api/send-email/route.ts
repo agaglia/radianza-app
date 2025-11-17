@@ -67,9 +67,11 @@ export async function POST(request: Request) {
 
     // Prepara il contenuto HTML
     const emailHtml = html || message.replace(/\n/g, '<br>')
+    const emailText = message
 
     console.log('📧 [SERVER] Invio email a:', recipients)
     console.log('❓ [SERVER] ReplyTo ricevuto dal client:', clientReplyTo)
+    console.log('📝 [SERVER] HTML disponibile:', !!html)
 
     // Se il client non passa il replyTo, recuperalo da Supabase
     let finalReplyTo = clientReplyTo
@@ -82,7 +84,8 @@ export async function POST(request: Request) {
       from: 'Radianza <onboarding@resend.dev>',
       to: recipients,
       subject: subject,
-      html: emailHtml
+      html: emailHtml,
+      text: emailText  // Add plain text fallback
     }
 
     // Aggiungi reply-to se disponibile
