@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { MessageSquare, Copy, Check, FileText, Mail, Send } from 'lucide-react'
+import { MESSAGE_TEMPLATES } from '@/lib/message-templates'
 
 interface Meeting {
   id: string
@@ -110,6 +111,17 @@ Ci vediamo! ✨`
       } else {
         setTemplates(defaultTemplates)
       }
+      
+      // Load global email templates with HTML support
+      const globalEmailTemplates = MESSAGE_TEMPLATES.map(t => ({
+        id: t.id,
+        name: t.name,
+        type: 'email' as const,
+        subject: t.subject,
+        body: t.body,
+        htmlBody: t.htmlBody
+      }))
+      setEmailTemplates(globalEmailTemplates)
     }
   }, [])
 
@@ -236,16 +248,22 @@ Radianza`
         minute: '2-digit'
       })
 
+      const eventDateTime = `${date} ore ${time}`
+
       let subject = emailSubject
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
         .replace(/{data_incontro}/g, date)
         .replace(/{ora_incontro}/g, time)
+        .replace(/{eventDateTime}/g, eventDateTime)
+        .replace(/{topic}/g, selectedEmailMeeting.title)
 
       let body = emailBody
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
         .replace(/{descrizione_incontro}/g, selectedEmailMeeting.description || '')
         .replace(/{data_incontro}/g, date)
         .replace(/{ora_incontro}/g, time)
+        .replace(/{eventDateTime}/g, eventDateTime)
+        .replace(/{topic}/g, selectedEmailMeeting.title)
 
       // Also replace variables in HTML if available
       let html = emailHtml
@@ -253,6 +271,8 @@ Radianza`
         .replace(/{descrizione_incontro}/g, selectedEmailMeeting.description || '')
         .replace(/{data_incontro}/g, date)
         .replace(/{ora_incontro}/g, time)
+        .replace(/{eventDateTime}/g, eventDateTime)
+        .replace(/{topic}/g, selectedEmailMeeting.title)
 
       const response = await fetch('/api/send-email', {
         method: 'POST',
