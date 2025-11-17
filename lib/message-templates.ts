@@ -21,18 +21,18 @@ export const MESSAGE_TEMPLATES: MessageTemplate[] = [
     subject: '📹 Incontro Radianza - Link di accesso',
     body: `Caro partecipante,
 
-Ti comunichiamo che la videolezione di Radianza è programmata come segue:
+Ti comunichiamo che l'incontro di Radianza è programmato come segue:
 
 📅 Data e Ora: {eventDateTime}
 👨‍🏫 Conduttore/a: {organizerName}
 📚 Argomento: {topic}
 
-LINK PER L'ACCESSO:
+LINK PER L'ACCESSO (in questa email):
 🔗 Link Principale: {meetLink1}
-🔗 Link Alternativo (se necessario): {meetLink2}
+🔗 Link di Continuazione (se necessario): {meetLink2}
 
 ⏱️ NOTA IMPORTANTE:
-Se il primo link raggiunge il limite di partecipanti o di tempo, utilizzeremo il secondo link. Ti consigliamo di tenere a portata di mano entrambi i link per una transizione rapida e senza interruzioni.
+Entrambi i link sono in questa email. Se il primo link raggiunge il limite di partecipanti o di tempo, utilizzeremo il secondo link. Ti consigliamo di tenere a portata di mano entrambi i link per una transizione rapida e senza interruzioni.
 
 ✅ NON è necessaria alcuna registrazione preventiva. Puoi accedere direttamente dal link.
 
