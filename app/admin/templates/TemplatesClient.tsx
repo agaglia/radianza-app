@@ -297,7 +297,7 @@ export default function TemplatesClient() {
                 : 'text-radianza-deep-blue/60 hover:text-radianza-deep-blue'
             }`}
           >
-            Template Predefiniti (Videolezioni)
+            Template Predefiniti (Incontri)
           </button>
           <button
             onClick={() => setActiveTab('custom')}
@@ -316,7 +316,7 @@ export default function TemplatesClient() {
           <div className="space-y-6">
             <div className="bg-gradient-to-r from-radianza-celestial/50 to-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-radianza-gold/30">
               <p className="text-radianza-deep-blue">
-                Questi sono i template predefiniti per inviare videolezioni con link Google Meet. 
+                Questi sono i template predefiniti per inviare incontri con link Google Meet. 
                 Seleziona un template e compila i valori per inviare ai partecipanti.
               </p>
             </div>
