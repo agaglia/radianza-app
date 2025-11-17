@@ -1,14 +1,53 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import { createClient } from '@/lib/supabase/server'
 
-// Configura il transporter di Nodemailer con Gmail
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASSWORD
+// Creiamo il transporter in modo dinamico
+let transporter: nodemailer.Transporter | null = null
+
+async function getTransporter() {
+  if (transporter) return transporter
+
+  // Prova a leggere da Supabase prima
+  try {
+    const supabase = await createClient()
+    const { data: setting } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'gmail_config')
+      .single()
+
+    if (setting?.value) {
+      const { gmailUser, gmailPassword } = setting.value
+      if (gmailUser && gmailPassword) {
+        console.log('📧 Uso credenziali Gmail da Supabase')
+        return nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: gmailUser,
+            pass: gmailPassword
+          }
+        })
+      }
+    }
+  } catch (err) {
+    console.log('⚠️ Supabase non disponibile, provo .env')
   }
-})
+
+  // Fallback a .env
+  if (process.env.GMAIL_USER && process.env.GMAIL_PASSWORD) {
+    console.log('📧 Uso credenziali Gmail da .env.local')
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASSWORD
+      }
+    })
+  }
+
+  throw new Error('Credenziali Gmail non configurate')
+}
 
 export async function POST(request: Request) {
   try {
@@ -29,20 +68,29 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verifica credenziali Gmail
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASSWORD) {
-      console.error('❌ GMAIL_USER o GMAIL_PASSWORD non configurato')
-      return NextResponse.json(
-        { success: false, error: 'Servizio email non configurato' },
-        { status: 500 }
-      )
-    }
+    // Ottieni il transporter
+    const transporter = await getTransporter()
 
     // Prepara il contenuto HTML
     const emailHtml = html || message.replace(/\n/g, '<br>')
-    const fromEmail = process.env.GMAIL_FROM || process.env.GMAIL_USER
 
-    console.log('📧 Invio email con Gmail a:', recipients)
+    // Leggi fromEmail da Supabase o .env
+    let fromEmail = process.env.GMAIL_FROM || process.env.GMAIL_USER
+    try {
+      const supabase = await createClient()
+      const { data: setting } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'gmail_config')
+        .single()
+      if (setting?.value?.gmailFrom) {
+        fromEmail = setting.value.gmailFrom
+      }
+    } catch (err) {
+      // Usa il fallback
+    }
+
+    console.log('📧 Invio email a:', recipients)
 
     // Invia email
     const info = await transporter.sendMail({
@@ -53,17 +101,17 @@ export async function POST(request: Request) {
       text: message
     })
 
-    console.log('✅ Email inviata con successo:', info.messageId)
+    console.log('✅ Email inviata:', info.messageId)
 
     return NextResponse.json({
       success: true,
-      message: `Email inviata con successo a ${recipients.length} destinatari`,
+      message: `Email inviata a ${recipients.length} destinatari`,
       recipients: recipients.length,
       messageId: info.messageId
     })
 
   } catch (error: any) {
-    console.error('❌ Errore invio email:', error)
+    console.error('❌ Errore email:', error.message)
     return NextResponse.json(
       { success: false, error: error.message || 'Errore sconosciuto' },
       { status: 500 }

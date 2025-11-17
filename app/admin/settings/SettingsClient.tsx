@@ -27,8 +27,8 @@ export default function SettingsClient() {
   const handleSave = async () => {
     setMessage(null)
     try {
-      // Salva le credenziali Gmail come variabili d'ambiente tramite API
-      const response = await fetch('/api/admin/settings', {
+      // Salva le credenziali Gmail in Supabase
+      const response = await fetch('/api/admin/settings/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
