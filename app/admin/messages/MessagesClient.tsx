@@ -119,6 +119,17 @@ Ti comunichiamo che l'incontro di Radianza è programmato come segue:
 {descrizione_incontro}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+🔗 LINK PER L'ACCESSO
+
+LINK PRINCIPALE:
+{meetLink1}
+
+LINK SECONDARIO (se necessario):
+Se il primo link raggiunge il limite di tempo, utilizza questo link:
+{meetLink2}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 ✅ NON è necessaria alcuna registrazione preventiva.
 Puoi accedere direttamente all'incontro.
 
