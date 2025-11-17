@@ -17,6 +17,94 @@ function getResendClient() {
 }
 
 /**
+ * Convert plain text email to richly formatted HTML
+ */
+function textToHTML(text: string, subject: string): string {
+  // Escape HTML special characters
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+
+  // Convert line breaks to paragraphs
+  const paragraphs = html.split('\n\n').map(p => p.trim()).filter(p => p)
+  const paragraphHTML = paragraphs.map(p => 
+    `<p style="margin: 15px 0; font-size: 15px; line-height: 1.6;">${p.replace(/\n/g, '<br>')}</p>`
+  ).join('')
+
+  return `<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 40px 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #d4a574;
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      color: #5a4a7d;
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      margin: 20px 0;
+    }
+    .divider {
+      height: 1px;
+      background-color: #d4a574;
+      margin: 30px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✨ Radianza ✨</h1>
+    </div>
+    
+    <div class="content">
+      ${paragraphHTML}
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="footer">
+      <p>Questo è un messaggio automatico da Radianza.</p>
+    </div>
+  </div>
+</body>
+</html>`
+}
+
+/**
  * Get reply-to email from Supabase settings
  */
 async function getReplyToFromSettings(): Promise<string | undefined> {
@@ -66,12 +154,17 @@ export async function POST(request: Request) {
     const resend = getResendClient()
 
     // Prepara il contenuto HTML
-    const emailHtml = html || message.replace(/\n/g, '<br>')
+    // Se HTML non è già formattato (meno di 500 chars), convertilo automaticamente
+    let emailHtml = html
+    if (!emailHtml || emailHtml.length < 500) {
+      emailHtml = textToHTML(message, subject)
+    }
     const emailText = message
 
     console.log('📧 [SERVER] Invio email a:', recipients)
     console.log('❓ [SERVER] ReplyTo ricevuto dal client:', clientReplyTo)
     console.log('📝 [SERVER] HTML disponibile:', !!html)
+    console.log('📄 [SERVER] HTML length:', emailHtml.length)
 
     // Se il client non passa il replyTo, recuperalo da Supabase
     let finalReplyTo = clientReplyTo
@@ -97,6 +190,8 @@ export async function POST(request: Request) {
     }
 
     console.log('📤 [SERVER] Configurazione email finale:', JSON.stringify(emailConfig, null, 2))
+    console.log('📄 [SERVER] HTML length:', emailHtml.length)
+    console.log('📄 [SERVER] HTML preview (first 200 chars):', emailHtml.substring(0, 200))
 
     const data = await resend.emails.send(emailConfig)
 
