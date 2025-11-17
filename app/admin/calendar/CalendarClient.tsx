@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Plus, Trash2, Calendar as CalendarIcon, Users, Check, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Trash2, Calendar as CalendarIcon, Users, Check, X, ChevronLeft, ChevronRight, Edit } from 'lucide-react'
 import { generateMeetLink } from '@/lib/meet-generator'
 
 interface Meeting {
@@ -22,6 +22,7 @@ interface Meeting {
 
 export default function CalendarClient({ meetings, userId }: { meetings: Meeting[], userId: string }) {
   const [showModal, setShowModal] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [newMeeting, setNewMeeting] = useState({
     title: '',
     description: '',
@@ -39,27 +40,65 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
     
     try {
       const dateTime = `${newMeeting.date}T${newMeeting.time}:00`
-      const meetLink = generateMeetLink()
       
-      const { error } = await supabase
-        .from('meetings')
-        .insert({
-          title: newMeeting.title,
-          description: newMeeting.description || null,
-          date: dateTime,
-          meet_link: meetLink,
-          created_by: userId
-        })
+      if (editingId) {
+        // Update existing meeting
+        const { error } = await supabase
+          .from('meetings')
+          .update({
+            title: newMeeting.title,
+            description: newMeeting.description || null,
+            date: dateTime
+          })
+          .eq('id', editingId)
 
-      if (error) throw error
+        if (error) throw error
+        alert('✅ Incontro aggiornato con successo!')
+      } else {
+        // Create new meeting
+        const meetLink = generateMeetLink()
+        const { error } = await supabase
+          .from('meetings')
+          .insert({
+            title: newMeeting.title,
+            description: newMeeting.description || null,
+            date: dateTime,
+            meet_link: meetLink,
+            created_by: userId
+          })
 
-      alert('✅ Incontro creato con successo!\nLink Meet: ' + meetLink)
+        if (error) throw error
+        alert('✅ Incontro creato con successo!\nLink Meet: ' + meetLink)
+      }
+
       setShowModal(false)
+      setEditingId(null)
       setNewMeeting({ title: '', description: '', date: '', time: '' })
       router.refresh()
     } catch (error: any) {
       alert('❌ Errore: ' + error.message)
     }
+  }
+
+  const openEditModal = (meeting: Meeting) => {
+    const date = new Date(meeting.date)
+    const dateStr = date.toISOString().split('T')[0]
+    const timeStr = date.toTimeString().slice(0, 5)
+    
+    setEditingId(meeting.id)
+    setNewMeeting({
+      title: meeting.title,
+      description: meeting.description || '',
+      date: dateStr,
+      time: timeStr
+    })
+    setShowModal(true)
+  }
+
+  const closeModal = () => {
+    setShowModal(false)
+    setEditingId(null)
+    setNewMeeting({ title: '', description: '', date: '', time: '' })
   }
 
   const handleDelete = async (id: string) => {
@@ -169,20 +208,24 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
               return (
                 <div
                   key={meeting.id}
-                  className={`text-xs p-1.5 rounded cursor-pointer transition-all ${
+                  className={`text-xs p-1.5 rounded transition-all group ${
                     past
                       ? 'bg-radianza-deep-blue/10 text-radianza-deep-blue/60'
                       : 'bg-radianza-celestial text-radianza-deep-blue hover:shadow-sm'
                   }`}
-                  onClick={() => {
-                    const time = new Date(meeting.date).toLocaleTimeString('it-IT', {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })
-                    alert(`${meeting.title}\n${time}\n\n${meeting.description || 'Nessuna descrizione'}\n\nPresenze: ${stats.present}/${stats.total} (${stats.percentage}%)`)
-                  }}
                 >
-                  <div className="font-medium truncate">{meeting.title}</div>
+                  <div 
+                    className="font-medium truncate cursor-pointer hover:underline"
+                    onClick={() => {
+                      const time = new Date(meeting.date).toLocaleTimeString('it-IT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                      alert(`${meeting.title}\n${time}\n\n${meeting.description || 'Nessuna descrizione'}\n\nPresenze: ${stats.present}/${stats.total} (${stats.percentage}%)`)
+                    }}
+                  >
+                    {meeting.title}
+                  </div>
                   <div className="text-[10px] opacity-75">
                     {new Date(meeting.date).toLocaleTimeString('it-IT', {
                       hour: '2-digit',
@@ -192,6 +235,32 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
                   {stats.total > 0 && (
                     <div className="text-[10px] opacity-75">
                       👥 {stats.present}/{stats.total}
+                    </div>
+                  )}
+                  {!past && (
+                    <div className="flex items-center space-x-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          openEditModal(meeting)
+                        }}
+                        className="p-0.5 text-radianza-gold hover:bg-radianza-gold/20 rounded text-[10px]"
+                        title="Modifica"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm('Sei sicuro di voler eliminare questo incontro?')) {
+                            handleDelete(meeting.id)
+                          }
+                        }}
+                        className="p-0.5 text-red-600 hover:bg-red-50 rounded text-[10px]"
+                        title="Elimina"
+                      >
+                        🗑️
+                      </button>
                     </div>
                   )}
                 </div>
@@ -367,12 +436,22 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={() => handleDelete(meeting.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-4"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center space-x-2 ml-4">
+                      <button
+                        onClick={() => openEditModal(meeting)}
+                        className="p-2 text-radianza-gold hover:bg-radianza-gold/10 rounded-lg transition-colors"
+                        title="Modifica incontro"
+                      >
+                        <Edit className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(meeting.id)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Elimina incontro"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               )
@@ -414,7 +493,9 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-8">
-            <h2 className="text-2xl font-bold text-radianza-deep-blue mb-6">Crea Nuovo Incontro</h2>
+            <h2 className="text-2xl font-bold text-radianza-deep-blue mb-6">
+              {editingId ? 'Modifica Incontro' : 'Crea Nuovo Incontro'}
+            </h2>
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Titolo *</label>
@@ -462,7 +543,7 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
               <div className="flex space-x-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowModal(false)}
+                  onClick={() => closeModal()}
                   className="flex-1 px-4 py-2 border border-radianza-gold/30 text-radianza-deep-blue rounded-lg hover:bg-radianza-gold/10 transition-colors"
                 >
                   Annulla
@@ -471,7 +552,7 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
                   type="submit"
                   className="flex-1 px-4 py-2 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
                 >
-                  Crea Incontro
+                  {editingId ? 'Salva Incontro' : 'Crea Incontro'}
                 </button>
               </div>
             </form>
