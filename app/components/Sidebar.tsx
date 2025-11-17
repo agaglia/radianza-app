@@ -134,7 +134,7 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
           return (
             <div key={section.title}>
               {!collapsed && (
-                <h3 className="text-xs font-semibold text-radianza-deep-blue/50 uppercase mb-2 px-3">
+                <h3 className="text-xs font-semibold text-radianza-deep-blue/50 uppercase mb-2 px-3 text-[0.65rem]">
                   {section.title}
                 </h3>
               )}
@@ -147,14 +147,14 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all ${
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all text-sm ${
                         isActive
                           ? 'bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white shadow-lg'
                           : 'text-radianza-deep-blue/70 hover:bg-radianza-gold/10 hover:text-radianza-deep-blue'
                       }`}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      {!collapsed && <span className="font-medium">{item.name}</span>}
+                      <Icon className="w-4 h-4 flex-shrink-0" />
+                      {!collapsed && <span className="font-medium text-xs">{item.name}</span>}
                     </Link>
                   )
                 })}
@@ -168,10 +168,10 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
       <div className="p-4 border-t border-radianza-gold/30">
         {!collapsed && (
           <div className="mb-3 px-3">
-            <p className="text-xs text-radianza-deep-blue/50">Connesso come</p>
-            <p className="text-sm font-medium text-radianza-deep-blue truncate">{userEmail}</p>
+            <p className="text-[0.65rem] text-radianza-deep-blue/50">Connesso come</p>
+            <p className="text-xs font-medium text-radianza-deep-blue truncate">{userEmail}</p>
             {isAdmin && (
-              <span className="inline-block mt-1 text-xs bg-radianza-gold/20 text-radianza-deep-blue px-2 py-0.5 rounded">
+              <span className="inline-block mt-1 text-[0.65rem] bg-radianza-gold/20 text-radianza-deep-blue px-2 py-0.5 rounded">
                 Amministratore
               </span>
             )}
@@ -179,10 +179,10 @@ export default function Sidebar({ userEmail, isAdmin }: SidebarProps) {
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 bg-radianza-deep-blue/10 text-radianza-deep-blue rounded-lg hover:bg-radianza-deep-blue hover:text-white transition-colors"
+          className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-radianza-deep-blue/10 text-radianza-deep-blue rounded-lg hover:bg-radianza-deep-blue hover:text-white transition-colors text-sm"
         >
-          <LogOut className="w-5 h-5" />
-          {!collapsed && <span className="font-medium">Esci</span>}
+          <LogOut className="w-4 h-4" />
+          {!collapsed && <span className="font-medium text-xs">Esci</span>}
         </button>
       </div>
     </div>
