@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Configura il transporter di Nodemailer con Gmail
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASSWORD
+  }
+})
 
 export async function POST(request: Request) {
   try {
@@ -22,46 +29,37 @@ export async function POST(request: Request) {
       )
     }
 
-    // Verifica API key
-    if (!process.env.RESEND_API_KEY) {
-      console.error('❌ RESEND_API_KEY non configurato')
+    // Verifica credenziali Gmail
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASSWORD) {
+      console.error('❌ GMAIL_USER o GMAIL_PASSWORD non configurato')
       return NextResponse.json(
         { success: false, error: 'Servizio email non configurato' },
         { status: 500 }
       )
     }
 
-    // Prepara il contenuto HTML (usa html se fornito, altrimenti converti message)
+    // Prepara il contenuto HTML
     const emailHtml = html || message.replace(/\n/g, '<br>')
+    const fromEmail = process.env.GMAIL_FROM || process.env.GMAIL_USER
 
-    // Email From address (di solito deve essere un dominio verified su Resend)
-    const fromEmail = process.env.EMAIL_FROM || 'noreply@radianza.org'
+    console.log('📧 Invio email con Gmail a:', recipients)
 
-    console.log('📧 Invio email con Resend a:', recipients, 'da:', fromEmail)
-
-    // Invia email a tutti i destinatari
-    const { data, error } = await resend.emails.send({
+    // Invia email
+    const info = await transporter.sendMail({
       from: fromEmail,
-      to: recipients,
+      to: recipients.join(', '),
       subject: subject,
-      html: emailHtml
+      html: emailHtml,
+      text: message
     })
 
-    if (error) {
-      console.error('❌ Errore Resend:', error)
-      return NextResponse.json(
-        { success: false, error: error.message || 'Errore nell\'invio email' },
-        { status: 500 }
-      )
-    }
-
-    console.log('✅ Email inviata con successo:', data)
+    console.log('✅ Email inviata con successo:', info.messageId)
 
     return NextResponse.json({
       success: true,
       message: `Email inviata con successo a ${recipients.length} destinatari`,
       recipients: recipients.length,
-      data: data
+      messageId: info.messageId
     })
 
   } catch (error: any) {
