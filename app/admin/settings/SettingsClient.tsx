@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Settings, Save, Mail, Palette, Info, LogOut } from 'lucide-react'
+import { Settings, Save, Mail, Palette, Info, LogOut, CheckCircle, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SettingsClient() {
@@ -12,21 +12,94 @@ export default function SettingsClient() {
   const [settings, setSettings] = useState({
     groupName: 'Radianza',
     emailFrom: 'noreply@radianza.org',
-    emailProvider: 'resend',
-    emailApiKey: '',
+    gmailUser: '',
+    gmailPassword: '',
     primaryColor: '#D4AF37',
     secondaryColor: '#1a237e',
     logoUrl: ''
   })
 
   const [saved, setSaved] = useState(false)
+  const [testEmail, setTestEmail] = useState('')
+  const [testLoading, setTestLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  const handleSave = () => {
-    // TODO: Salvare le impostazioni in Supabase o in variabili d'ambiente
-    localStorage.setItem('radianza_settings', JSON.stringify(settings))
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-    alert('✅ Impostazioni salvate!')
+  const handleSave = async () => {
+    setMessage(null)
+    try {
+      // Salva le credenziali Gmail come variabili d'ambiente tramite API
+      const response = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gmailUser: settings.gmailUser,
+          gmailPassword: settings.gmailPassword,
+          gmailFrom: settings.emailFrom || settings.gmailUser
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore nel salvataggio')
+      }
+
+      // Salva anche in localStorage per la UI
+      localStorage.setItem('radianza_settings', JSON.stringify(settings))
+      setSaved(true)
+      setMessage({
+        type: 'success',
+        text: '✅ Impostazioni email salvate con successo!'
+      })
+      setTimeout(() => setSaved(false), 2000)
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: `❌ Errore: ${error.message}`
+      })
+    }
+  }
+
+  const handleTestEmail = async () => {
+    if (!testEmail) {
+      setMessage({ type: 'error', text: '❌ Inserisci un indirizzo email di test' })
+      return
+    }
+
+    setTestLoading(true)
+    setMessage(null)
+
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients: [testEmail],
+          subject: '🎉 Test Email Radianza',
+          message: 'Questa è un\'email di test. La configurazione di Gmail funziona correttamente!',
+          html: '<h2>Test Email Radianza</h2><p>Questa è un\'email di test. La configurazione di Gmail funziona correttamente! ✅</p>'
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Errore nell\'invio del test')
+      }
+
+      setMessage({
+        type: 'success',
+        text: `✅ Email di test inviata a ${testEmail}!`
+      })
+      setTestEmail('')
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: `❌ Errore: ${error.message}`
+      })
+    } finally {
+      setTestLoading(false)
+    }
   }
 
   const handleLogout = async () => {
@@ -52,6 +125,24 @@ export default function SettingsClient() {
         </div>
 
         <div className="space-y-6">
+          {/* Messaggi */}
+          {message && (
+            <div
+              className={`flex items-center space-x-3 p-4 rounded-lg border ${
+                message.type === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
+              {message.type === 'success' ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              <span>{message.text}</span>
+            </div>
+          )}
+
           {/* Informazioni Gruppo */}
           <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-radianza-gold/30">
             <div className="flex items-center space-x-2 mb-4">
@@ -84,45 +175,84 @@ export default function SettingsClient() {
             </div>
           </div>
 
-          {/* Configurazione Email */}
+          {/* Configurazione Email Gmail */}
           <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-radianza-gold/30">
             <div className="flex items-center space-x-2 mb-4">
               <Mail className="w-5 h-5 text-radianza-gold" />
-              <h2 className="text-xl font-bold text-radianza-deep-blue">Configurazione Email</h2>
+              <h2 className="text-xl font-bold text-radianza-deep-blue">Configurazione Email (Gmail)</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Provider Email</label>
-                <select
-                  value={settings.emailProvider}
-                  onChange={(e) => setSettings({ ...settings, emailProvider: e.target.value })}
+                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Email Gmail</label>
+                <input
+                  type="email"
+                  value={settings.gmailUser}
+                  onChange={(e) => setSettings({ ...settings, gmailUser: e.target.value })}
+                  placeholder="tuo-email@gmail.com"
                   className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                >
-                  <option value="resend">Resend</option>
-                  <option value="sendgrid">SendGrid</option>
-                  <option value="smtp">SMTP Generico</option>
-                </select>
+                />
+                <p className="text-xs text-radianza-deep-blue/60 mt-1">
+                  Il tuo indirizzo Gmail da cui verranno inviate le email
+                </p>
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Email Mittente</label>
+                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Password App Google</label>
+                <input
+                  type="password"
+                  value={settings.gmailPassword}
+                  onChange={(e) => setSettings({ ...settings, gmailPassword: e.target.value })}
+                  placeholder="••••••••••••••••"
+                  className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                />
+                <p className="text-xs text-radianza-deep-blue/60 mt-1">
+                  Genera da{' '}
+                  <a
+                    href="https://myaccount.google.com/apppasswords"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-radianza-gold hover:underline font-medium"
+                  >
+                    Google Account → Security → App passwords
+                  </a>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Indirizzo Mittente</label>
                 <input
                   type="email"
                   value={settings.emailFrom}
                   onChange={(e) => setSettings({ ...settings, emailFrom: e.target.value })}
-                  className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">API Key</label>
-                <input
-                  type="password"
-                  value={settings.emailApiKey}
-                  onChange={(e) => setSettings({ ...settings, emailApiKey: e.target.value })}
-                  placeholder="Inserisci la tua API key"
+                  placeholder="noreply@radianza.org"
                   className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
                 />
                 <p className="text-xs text-radianza-deep-blue/60 mt-1">
-                  Ottieni l'API key dal tuo provider email (Resend, SendGrid, ecc.)
+                  Nome visualizzato nelle email (può essere uguale a Email Gmail)
+                </p>
+              </div>
+
+              {/* Test Email */}
+              <div className="bg-radianza-celestial/30 rounded-lg p-4 border border-radianza-gold/20">
+                <p className="text-sm font-medium text-radianza-deep-blue mb-3">Invia Email di Test</p>
+                <div className="flex space-x-2">
+                  <input
+                    type="email"
+                    value={testEmail}
+                    onChange={(e) => setTestEmail(e.target.value)}
+                    placeholder="test@example.com"
+                    className="flex-1 px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                  />
+                  <button
+                    onClick={handleTestEmail}
+                    disabled={testLoading || !settings.gmailUser || !settings.gmailPassword}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
+                  >
+                    {testLoading ? 'Invio...' : 'Test'}
+                  </button>
+                </div>
+                <p className="text-xs text-radianza-deep-blue/60 mt-2">
+                  Invia un'email di test per verificare che la configurazione funzioni correttamente
                 </p>
               </div>
             </div>
@@ -176,13 +306,14 @@ export default function SettingsClient() {
           </div>
 
           {/* Pulsante Salva */}
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-3">
             <button
               onClick={handleSave}
-              className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg transition-all"
+              disabled={!settings.gmailUser || !settings.gmailPassword}
+              className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <Save className="w-5 h-5" />
-              <span>{saved ? 'Salvato!' : 'Salva Impostazioni'}</span>
+              <span>{saved ? 'Salvato!' : 'Salva Impostazioni Email'}</span>
             </button>
           </div>
 

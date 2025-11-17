@@ -75,7 +75,7 @@ export async function GET() {
   return NextResponse.json({
     message: 'API Email Radianza',
     version: '2.0.0',
-    provider: 'Resend',
+    provider: 'Gmail + Nodemailer',
     endpoints: {
       POST: {
         description: 'Invia email a destinatari multipli',
@@ -89,8 +89,9 @@ export async function GET() {
       }
     },
     environment: {
-      RESEND_API_KEY: process.env.RESEND_API_KEY ? '✅ Configurato' : '❌ Non configurato',
-      EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@radianza.org'
+      GMAIL_USER: process.env.GMAIL_USER ? '✅ Configurato' : '❌ Non configurato',
+      GMAIL_PASSWORD: process.env.GMAIL_PASSWORD ? '✅ Configurato' : '❌ Non configurato',
+      GMAIL_FROM: process.env.GMAIL_FROM || '❌ Non configurato'
     }
   })
 }
