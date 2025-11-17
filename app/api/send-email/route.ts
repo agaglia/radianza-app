@@ -27,7 +27,11 @@ async function getOAuth2Client() {
 
 async function getTransporter() {
   try {
-    // Prova OAuth2
+    // Usa sempre OAuth2
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN) {
+      throw new Error('OAuth2 non configurato: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN sono obbligatori')
+    }
+
     const oauth2Client = await getOAuth2Client()
     
     // Ottieni l'access token
@@ -46,23 +50,11 @@ async function getTransporter() {
       }
     })
 
-    console.log('📧 Uso OAuth2 di Google')
+    console.log('📧 Uso OAuth2 di Google per:', process.env.GMAIL_USER)
     return transporter
-  } catch (err) {
-    console.log('⚠️ OAuth2 non disponibile, provo credenziali .env')
-    
-    // Fallback a credenziali semplici da .env (per dev)
-    if (process.env.GMAIL_USER && process.env.GMAIL_PASSWORD) {
-      return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_PASSWORD
-        }
-      })
-    }
-
-    throw new Error('Credenziali Gmail non configurate')
+  } catch (err: any) {
+    console.error('❌ Errore OAuth2:', err.message)
+    throw new Error(`Errore configurazione Gmail OAuth2: ${err.message}`)
   }
 }
 
