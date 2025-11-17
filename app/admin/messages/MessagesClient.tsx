@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { MessageSquare, Copy, Check, FileText, Mail, Send } from 'lucide-react'
-import { MESSAGE_TEMPLATES } from '@/lib/message-templates'
 
 interface Meeting {
   id: string
@@ -98,6 +97,92 @@ Ti ricordiamo:
 🕐 {data_incontro} - {ora_incontro}
 
 Ci vediamo! ✨`
+    },
+    {
+      id: '4',
+      name: 'Incontro con Link Meet',
+      type: 'email',
+      subject: '📹 Incontro Radianza - Link di accesso',
+      body: `Caro partecipante,
+
+Ti comunichiamo che l'incontro di Radianza è programmato come segue:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 DATA E ORA
+{data_incontro} ore {ora_incontro}
+
+📚 ARGOMENTO
+{titolo_incontro}
+
+{descrizione_incontro}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ NON è necessaria alcuna registrazione preventiva.
+Puoi accedere direttamente all'incontro.
+
+A presto!
+
+Radianza`,
+      htmlBody: `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { text-align: center; color: #5a4a7d; margin-bottom: 30px; }
+      .section { background-color: #f8f6fc; border-left: 4px solid #d4a574; padding: 20px; margin: 20px 0; border-radius: 4px; }
+      .section-title { font-size: 14px; font-weight: bold; color: #5a4a7d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+      .section-content { font-size: 16px; color: #333; }
+      .divider { height: 2px; background: linear-gradient(to right, #d4a574, transparent); margin: 30px 0; }
+      .footer { color: #999; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
+      .emoji { margin-right: 8px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📹 Incontro Radianza</h1>
+      </div>
+
+      <p>Caro partecipante,</p>
+      <p>Ti comunichiamo che l'incontro di Radianza è programmato come segue:</p>
+
+      <div class="section">
+        <div class="section-title"><span class="emoji">📅</span>DATA E ORA</div>
+        <div class="section-content">{data_incontro} ore {ora_incontro}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="emoji">📚</span>ARGOMENTO</div>
+        <div class="section-content">{titolo_incontro}</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="emoji">📝</span>DESCRIZIONE</div>
+        <div class="section-content">{descrizione_incontro}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div style="margin: 0;">
+          <strong>✅ NON è necessaria alcuna registrazione preventiva.</strong><br>
+          Puoi accedere direttamente all'incontro.
+        </div>
+      </div>
+
+      <p style="font-size: 16px; font-weight: bold; color: #5a4a7d; text-align: center; margin-top: 30px;">
+        A presto sull'incontro!<br>
+        <span style="font-size: 18px;">✨ Radianza ✨</span>
+      </p>
+
+      <div class="footer">
+        <p>Questo è un messaggio automatico da Radianza.</p>
+      </div>
+    </div>
+  </body>
+</html>`
     }
   ]
 
@@ -109,19 +194,9 @@ Ci vediamo! ✨`
         setTemplates(allTemplates.filter((t: Template) => t.type === 'whatsapp'))
         setEmailTemplates(allTemplates.filter((t: Template) => t.type === 'email'))
       } else {
-        setTemplates(defaultTemplates)
+        setTemplates(defaultTemplates.filter((t: Template) => t.type === 'whatsapp'))
+        setEmailTemplates(defaultTemplates.filter((t: Template) => t.type === 'email'))
       }
-      
-      // Load global email templates with HTML support
-      const globalEmailTemplates = MESSAGE_TEMPLATES.map(t => ({
-        id: t.id,
-        name: t.name,
-        type: 'email' as const,
-        subject: t.subject,
-        body: t.body,
-        htmlBody: t.htmlBody
-      }))
-      setEmailTemplates(globalEmailTemplates)
     }
   }, [])
 
