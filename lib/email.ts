@@ -18,20 +18,6 @@ export interface EmailResponse {
 }
 
 /**
- * Get email reply-to from Supabase settings
- */
-async function getReplyToEmail(): Promise<string | undefined> {
-  try {
-    const response = await fetch('/api/email-config')
-    const data = await response.json()
-    return data.replyToEmail
-  } catch (error) {
-    console.warn('Could not get reply-to email from settings:', error)
-    return undefined
-  }
-}
-
-/**
  * Send email to one or more recipients
  * @param options Email options including recipients, subject, and message
  * @returns Promise with success status
@@ -40,8 +26,7 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResponse> {
   try {
     const recipients = Array.isArray(options.to) ? options.to : [options.to]
 
-    // Se non è specificato il replyTo, recuperalo dalle impostazioni
-    const replyTo = options.replyTo || (await getReplyToEmail())
+    console.log('📨 [CLIENT] Preparazione email:', { recipients, subject: options.subject })
 
     const body: any = {
       recipients,
@@ -50,9 +35,16 @@ export async function sendEmail(options: EmailOptions): Promise<EmailResponse> {
       html: options.html
     }
 
-    if (replyTo) {
-      body.replyTo = replyTo
+    // Se il client passa un replyTo specifico, usalo
+    // Altrimenti il server lo recupererà da Supabase
+    if (options.replyTo) {
+      body.replyTo = options.replyTo
+      console.log('✅ [CLIENT] ReplyTo passato al server:', options.replyTo)
+    } else {
+      console.log('ℹ️  [CLIENT] Nessun replyTo specificato - il server lo recupererà da Supabase')
     }
+
+    console.log('📤 [CLIENT] Body inviato all\'API:', JSON.stringify(body, null, 2))
 
     const response = await fetch('/api/send-email', {
       method: 'POST',

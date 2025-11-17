@@ -16,9 +16,37 @@ function getResendClient() {
   return resendClient
 }
 
+/**
+ * Get reply-to email from Supabase settings
+ */
+async function getReplyToFromSettings(): Promise<string | undefined> {
+  try {
+    console.log('🔍 [SERVER] Recuperando reply-to da Supabase...')
+    const supabase = await createClient()
+
+    const { data: emailConfig, error } = await supabase
+      .from('app_settings')
+      .select('value')
+      .eq('key', 'email_config')
+      .single()
+
+    if (error) {
+      console.warn('⚠️  [SERVER] Email config non trovato:', error)
+      return undefined
+    }
+
+    const replyTo = emailConfig?.value?.replyToEmail
+    console.log('✅ [SERVER] Reply-To da Supabase:', replyTo)
+    return replyTo
+  } catch (error: any) {
+    console.error('❌ [SERVER] Errore nel recupero reply-to:', error)
+    return undefined
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const { recipients, subject, message, html, replyTo } = await request.json()
+    const { recipients, subject, message, html, replyTo: clientReplyTo } = await request.json()
 
     // Validazione input
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
@@ -40,7 +68,14 @@ export async function POST(request: Request) {
     // Prepara il contenuto HTML
     const emailHtml = html || message.replace(/\n/g, '<br>')
 
-    console.log('📧 Invio email a:', recipients)
+    console.log('📧 [SERVER] Invio email a:', recipients)
+    console.log('❓ [SERVER] ReplyTo ricevuto dal client:', clientReplyTo)
+
+    // Se il client non passa il replyTo, recuperalo da Supabase
+    let finalReplyTo = clientReplyTo
+    if (!finalReplyTo) {
+      finalReplyTo = await getReplyToFromSettings()
+    }
 
     // Invia email con Resend
     const emailConfig: any = {
@@ -50,11 +85,15 @@ export async function POST(request: Request) {
       html: emailHtml
     }
 
-    // Aggiungi reply-to se fornito
-    if (replyTo) {
-      emailConfig.replyTo = replyTo
-      console.log('↩️  Reply-To configurato:', replyTo)
+    // Aggiungi reply-to se disponibile
+    if (finalReplyTo) {
+      emailConfig.replyTo = finalReplyTo
+      console.log('↩️  [SERVER] Reply-To configurato in Resend:', finalReplyTo)
+    } else {
+      console.log('⚠️  [SERVER] Nessun reply-to disponibile')
     }
+
+    console.log('📤 [SERVER] Configurazione email finale:', JSON.stringify(emailConfig, null, 2))
 
     const data = await resend.emails.send(emailConfig)
 
