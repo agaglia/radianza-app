@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   try {
-    const { recipients, subject, message } = await request.json()
+    const { recipients, subject, message, html } = await request.json()
 
     // Validazione input
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
@@ -19,46 +22,52 @@ export async function POST(request: Request) {
       )
     }
 
-    // TODO: Implementare integrazione con provider email
-    // Opzione 1: Resend
-    // const resend = new Resend(process.env.EMAIL_API_KEY)
-    // const { data, error } = await resend.emails.send({
-    //   from: process.env.EMAIL_FROM || 'noreply@radianza.org',
-    //   to: recipients,
-    //   subject: subject,
-    //   html: message.replace(/\n/g, '<br>')
-    // })
+    // Verifica API key
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ RESEND_API_KEY non configurato')
+      return NextResponse.json(
+        { success: false, error: 'Servizio email non configurato' },
+        { status: 500 }
+      )
+    }
 
-    // Opzione 2: SendGrid
-    // const sgMail = require('@sendgrid/mail')
-    // sgMail.setApiKey(process.env.EMAIL_API_KEY)
-    // await sgMail.sendMultiple({
-    //   to: recipients,
-    //   from: process.env.EMAIL_FROM,
-    //   subject: subject,
-    //   html: message.replace(/\n/g, '<br>')
-    // })
+    // Prepara il contenuto HTML (usa html se fornito, altrimenti converti message)
+    const emailHtml = html || message.replace(/\n/g, '<br>')
 
-    // Per ora: simulazione successo
-    console.log('📧 Email simulation:', {
+    // Email From address (di solito deve essere un dominio verified su Resend)
+    const fromEmail = process.env.EMAIL_FROM || 'noreply@radianza.org'
+
+    console.log('📧 Invio email con Resend a:', recipients, 'da:', fromEmail)
+
+    // Invia email a tutti i destinatari
+    const { data, error } = await resend.emails.send({
+      from: fromEmail,
       to: recipients,
-      subject,
-      message: message.substring(0, 100) + '...'
+      subject: subject,
+      html: emailHtml
     })
 
-    // Simula un piccolo delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    if (error) {
+      console.error('❌ Errore Resend:', error)
+      return NextResponse.json(
+        { success: false, error: error.message || 'Errore nell\'invio email' },
+        { status: 500 }
+      )
+    }
+
+    console.log('✅ Email inviata con successo:', data)
 
     return NextResponse.json({
       success: true,
       message: `Email inviata con successo a ${recipients.length} destinatari`,
-      recipients: recipients.length
+      recipients: recipients.length,
+      data: data
     })
 
   } catch (error: any) {
     console.error('❌ Errore invio email:', error)
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error.message || 'Errore sconosciuto' },
       { status: 500 }
     )
   }
@@ -67,9 +76,23 @@ export async function POST(request: Request) {
 export async function GET() {
   return NextResponse.json({
     message: 'API Email Radianza',
-    version: '1.0.0',
+    version: '2.0.0',
+    provider: 'Resend',
     endpoints: {
-      POST: 'Invia email a destinatari multipli'
+      POST: {
+        description: 'Invia email a destinatari multipli',
+        body: {
+          recipients: ['email1@example.com', 'email2@example.com'],
+          subject: 'Oggetto email',
+          message: 'Messaggio in plain text',
+          html: '(opzionale) Messaggio in HTML'
+        },
+        required: ['recipients', 'subject', 'message']
+      }
+    },
+    environment: {
+      RESEND_API_KEY: process.env.RESEND_API_KEY ? '✅ Configurato' : '❌ Non configurato',
+      EMAIL_FROM: process.env.EMAIL_FROM || 'noreply@radianza.org'
     }
   })
 }
