@@ -14,7 +14,7 @@ async function getOAuth2Client() {
   oauth2Client = new oauth2({
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    redirectURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
+    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
   })
 
   // Imposta il refresh token (se disponibile)
