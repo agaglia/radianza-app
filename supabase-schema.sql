@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS meetings (
   title TEXT NOT NULL,
   description TEXT,
   date TIMESTAMPTZ NOT NULL,
+  meet_link TEXT,
+  meet_link_2 TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES profiles(id) ON DELETE SET NULL
 );
@@ -47,6 +49,8 @@ CREATE TABLE IF NOT EXISTS attendance (
 
 -- Indici per migliorare le performance
 CREATE INDEX IF NOT EXISTS idx_meetings_date ON meetings(date);
+CREATE INDEX IF NOT EXISTS idx_meetings_meet_link ON meetings(meet_link);
+CREATE INDEX IF NOT EXISTS idx_meetings_meet_link_2 ON meetings(meet_link_2);
 CREATE INDEX IF NOT EXISTS idx_content_created_at ON content(created_at);
 CREATE INDEX IF NOT EXISTS idx_attendance_meeting_id ON attendance(meeting_id);
 CREATE INDEX IF NOT EXISTS idx_attendance_user_id ON attendance(user_id);

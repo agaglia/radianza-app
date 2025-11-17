@@ -12,6 +12,7 @@ interface Meeting {
   description: string | null
   date: string
   meet_link?: string
+  meet_link_2?: string
   created_at: string
   attendance: Array<{
     id: string
@@ -55,20 +56,22 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
         if (error) throw error
         alert('✅ Incontro aggiornato con successo!')
       } else {
-        // Create new meeting
-        const meetLink = generateMeetLink()
+        // Create new meeting with TWO Meet links
+        const meetLink1 = generateMeetLink()
+        const meetLink2 = generateMeetLink()
         const { error } = await supabase
           .from('meetings')
           .insert({
             title: newMeeting.title,
             description: newMeeting.description || null,
             date: dateTime,
-            meet_link: meetLink,
+            meet_link: meetLink1,
+            meet_link_2: meetLink2,
             created_by: userId
           })
 
         if (error) throw error
-        alert('✅ Incontro creato con successo!\nLink Meet: ' + meetLink)
+        alert('✅ Incontro creato con successo!\n\nLink 1: ' + meetLink1 + '\n\nLink 2: ' + meetLink2)
       }
 
       setShowModal(false)

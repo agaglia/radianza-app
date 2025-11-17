@@ -9,6 +9,7 @@ interface Meeting {
   description: string | null
   date: string
   meet_link?: string
+  meet_link_2?: string
 }
 
 interface User {
@@ -226,7 +227,15 @@ Radianza`,
       
       <div style="text-align: center; margin: 30px 0;">
         <div style="font-size: 14px; font-weight: bold; color: #5a4a7d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">🔗 LINK PER L'ACCESSO</div>
-        <a href="{meetLink1}" style="display: inline-block; background-color: #d4a574; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Accedi all'incontro su Google Meet</a>
+        <div style="margin-bottom: 15px;">
+          <div style="font-size: 12px; color: #5a4a7d; margin-bottom: 8px; font-weight: bold;">LINK PRINCIPALE</div>
+          <a href="{meetLink1}" style="display: inline-block; background-color: #d4a574; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Accedi all'incontro su Google Meet</a>
+        </div>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #d4a574;">
+          <div style="font-size: 12px; color: #5a4a7d; margin-bottom: 8px; font-weight: bold;">LINK SECONDARIO (se necessario)</div>
+          <p style="font-size: 13px; color: #5a4a7d; margin: 8px 0;">Se il primo link raggiunge il limite di tempo, utilizza questo link:</p>
+          <a href="{meetLink2}" style="display: inline-block; background-color: #5a4a7d; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Accedi al link alternativo</a>
+        </div>
       </div>
 
       <div class="divider"></div>
@@ -389,7 +398,8 @@ Radianza`
       })
 
       const eventDateTime = `${date} ore ${time}`
-      const meetLink = selectedEmailMeeting.meet_link || ''
+      const meetLink1 = selectedEmailMeeting.meet_link || ''
+      const meetLink2 = selectedEmailMeeting.meet_link_2 || ''
 
       let subject = emailSubject
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
@@ -397,7 +407,8 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
-        .replace(/{meetLink1}/g, meetLink)
+        .replace(/{meetLink1}/g, meetLink1)
+        .replace(/{meetLink2}/g, meetLink2)
 
       let body = emailBody
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
@@ -406,7 +417,8 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
-        .replace(/{meetLink1}/g, meetLink)
+        .replace(/{meetLink1}/g, meetLink1)
+        .replace(/{meetLink2}/g, meetLink2)
 
       // Also replace variables in HTML if available
       let html = emailHtml
@@ -416,7 +428,8 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
-        .replace(/{meetLink1}/g, meetLink)
+        .replace(/{meetLink1}/g, meetLink1)
+        .replace(/{meetLink2}/g, meetLink2)
 
       const response = await fetch('/api/send-email', {
         method: 'POST',
