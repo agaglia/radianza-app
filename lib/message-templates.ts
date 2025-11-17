@@ -14,42 +14,10 @@ export interface MessageTemplate {
 
 export const MESSAGE_TEMPLATES: MessageTemplate[] = [
   {
-    id: 'incontro-dual-meet',
-    name: 'Incontro con 2 Link Meet',
-    title: '📹 Incontro con Due Link Google Meet',
-    description: 'Template per inviare un incontro con due link Meet (per continuare se il primo raggiunge il limite)',
-    subject: '📹 Incontro Radianza - Link di accesso',
-    body: `Caro partecipante,
-
-Ti comunichiamo che l'incontro di Radianza è programmato come segue:
-
-📅 Data e Ora: {eventDateTime}
-👨‍🏫 Conduttore/a: {organizerName}
-📚 Argomento: {topic}
-
-LINK PER L'ACCESSO (in questa email):
-🔗 Link Principale: {meetLink1}
-🔗 Link di Continuazione (se necessario): {meetLink2}
-
-⏱️ NOTA IMPORTANTE:
-Entrambi i link sono in questa email. Se il primo link raggiunge il limite di partecipanti o di tempo, utilizzeremo il secondo link. Ti consigliamo di tenere a portata di mano entrambi i link per una transizione rapida e senza interruzioni.
-
-✅ NON è necessaria alcuna registrazione preventiva. Puoi accedere direttamente dal link.
-
-Per eventuali problemi o domande:
-📧 Contattaci: {replyToEmail}
-
-A presto sull'incontro!
-
-Radianza`,
-    variables: ['{eventDateTime}', '{organizerName}', '{topic}', '{meetLink1}', '{meetLink2}', '{replyToEmail}']
-  },
-
-  {
-    id: 'incontro-singolo-meet',
-    name: 'Incontro con 1 Link Meet',
-    title: '📹 Incontro con Google Meet',
-    description: 'Template semplice per inviare un incontro con un singolo link Meet',
+    id: 'incontro-meet',
+    name: 'Incontro con Link Meet',
+    title: '📹 Incontro Radianza',
+    description: 'Template per inviare un incontro con link Google Meet (modificabile)',
     subject: '📹 Incontro Radianza - Link di accesso',
     body: `Caro partecipante,
 

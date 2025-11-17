@@ -96,7 +96,8 @@ export default function TemplatesClient() {
     variables: {} as Record<string, string>,
     recipientEmails: '',
     sending: false,
-    message: null as { type: 'success' | 'error'; text: string } | null
+    message: null as { type: 'success' | 'error'; text: string } | null,
+    templateBody: '' // Template body that can be modified
   })
   const [processedMessage, setProcessedMessage] = useState<{ subject: string; body: string } | null>(null)
   const [copied, setCopied] = useState(false)
@@ -170,7 +171,8 @@ export default function TemplatesClient() {
         variables: vars,
         recipientEmails: '',
         sending: false,
-        message: null
+        message: null,
+        templateBody: template.body // Initialize with original template body
       })
       setProcessedMessage(null)
       setShowSendModal(true)
@@ -183,7 +185,38 @@ export default function TemplatesClient() {
 
     const template = getPredefinedTemplate(sendData.templateId)
     if (template) {
-      setProcessedMessage(processTemplate(template, newVars))
+      // Use the modified template body
+      let subject = template.subject
+      let body = sendData.templateBody
+
+      // Replace all variables
+      for (const [varKey, varValue] of Object.entries(newVars)) {
+        const placeholder = `{${varKey}}`
+        subject = subject.replace(new RegExp(placeholder, 'g'), varValue)
+        body = body.replace(new RegExp(placeholder, 'g'), varValue)
+      }
+
+      setProcessedMessage({ subject, body })
+    }
+  }
+
+  const handleUpdateTemplateBody = (newBody: string) => {
+    setSendData({ ...sendData, templateBody: newBody })
+    
+    // Update preview with new body
+    const template = getPredefinedTemplate(sendData.templateId)
+    if (template) {
+      let subject = template.subject
+      let body = newBody
+
+      // Replace all variables
+      for (const [key, value] of Object.entries(sendData.variables)) {
+        const placeholder = `{${key}}`
+        subject = subject.replace(new RegExp(placeholder, 'g'), value)
+        body = body.replace(new RegExp(placeholder, 'g'), value)
+      }
+
+      setProcessedMessage({ subject, body })
     }
   }
 
@@ -316,8 +349,7 @@ export default function TemplatesClient() {
           <div className="space-y-6">
             <div className="bg-gradient-to-r from-radianza-celestial/50 to-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-radianza-gold/30">
               <p className="text-radianza-deep-blue">
-                Questi sono i template predefiniti per inviare incontri con link Google Meet. 
-                Seleziona un template e compila i valori per inviare ai partecipanti.
+                Seleziona un template per inviare incontri con link Google Meet. Puoi modificare il contenuto prima di inviare.
               </p>
             </div>
 
@@ -528,24 +560,40 @@ export default function TemplatesClient() {
               )}
 
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Variabili */}
-                <div>
-                  <h3 className="text-lg font-bold text-radianza-deep-blue mb-4">Valori da Inserire</h3>
-                  <div className="space-y-4">
-                    {Object.keys(sendData.variables).map(key => (
-                      <div key={key}>
-                        <label className="block text-sm font-medium text-radianza-deep-blue mb-2">
-                          {key}
-                        </label>
-                        <input
-                          type={key.includes('Link') || key.includes('Email') || key.includes('email') ? 'url' : key.includes('Date') || key.includes('Time') ? 'datetime-local' : 'text'}
-                          value={sendData.variables[key] || ''}
-                          onChange={e => handleUpdateVariable(key, e.target.value)}
-                          placeholder={`Inserisci ${key}`}
-                          className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                        />
-                      </div>
-                    ))}
+                {/* Variabili e Modifica Template */}
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-radianza-deep-blue mb-4">Valori da Inserire</h3>
+                    <div className="space-y-4">
+                      {Object.keys(sendData.variables).map(key => (
+                        <div key={key}>
+                          <label className="block text-sm font-medium text-radianza-deep-blue mb-2">
+                            {key}
+                          </label>
+                          <input
+                            type={key.includes('Link') || key.includes('Email') || key.includes('email') ? 'url' : key.includes('Date') || key.includes('Time') ? 'datetime-local' : 'text'}
+                            value={sendData.variables[key] || ''}
+                            onChange={e => handleUpdateVariable(key, e.target.value)}
+                            placeholder={`Inserisci ${key}`}
+                            className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-bold text-radianza-deep-blue mb-4">Modifica Messaggio</h3>
+                    <textarea
+                      value={sendData.templateBody}
+                      onChange={e => handleUpdateTemplateBody(e.target.value)}
+                      rows={12}
+                      className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none font-mono text-sm"
+                      placeholder="Modifica il corpo del messaggio..."
+                    />
+                    <p className="text-xs text-radianza-deep-blue/60 mt-2">
+                      Puoi usare le variabili: {sendData.templateBody ? Object.keys(sendData.variables).map(k => `{${k}}`).join(', ') : 'nessuna'}
+                    </p>
                   </div>
                 </div>
 
