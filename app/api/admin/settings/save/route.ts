@@ -30,26 +30,29 @@ export async function POST(request: Request) {
       )
     }
 
-    // Salva in Supabase (tabella app_settings)
+    // Salva SOLO in Supabase (tabella app_settings)
     const { error } = await supabase
       .from('app_settings')
-      .upsert({
-        key: 'gmail_config',
-        value: {
-          gmailUser,
-          gmailPassword,
-          gmailFrom: gmailFrom || gmailUser,
-          updatedAt: new Date().toISOString()
+      .upsert(
+        {
+          key: 'gmail_config',
+          value: {
+            gmailUser,
+            gmailPassword,
+            gmailFrom: gmailFrom || gmailUser,
+            updatedAt: new Date().toISOString()
+          },
+          updated_at: new Date().toISOString()
         },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'key' })
+        { onConflict: 'key' }
+      )
 
     if (error) throw error
 
     console.log('✅ Gmail configurato in Supabase')
     return NextResponse.json({
       success: true,
-      message: 'Configurazione salvata. Azioneeffetto immediato!'
+      message: 'Configurazione salvata con successo!'
     })
   } catch (error: any) {
     console.error('❌ Errore:', error)
