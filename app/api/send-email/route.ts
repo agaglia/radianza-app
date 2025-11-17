@@ -12,7 +12,7 @@ async function getOAuth2Client() {
   const oauth2 = google.auth.OAuth2
 
   oauth2Client = new oauth2({
-    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     redirectURL: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
   })
@@ -38,7 +38,7 @@ async function getTransporter() {
       auth: {
         type: 'OAuth2',
         user: process.env.GMAIL_USER,
-        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
         accessToken: credentials.access_token,
