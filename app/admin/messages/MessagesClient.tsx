@@ -251,7 +251,7 @@ Radianza`
           recipients,
           subject,
           message: body,
-          html: body.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          html: body // Send plain HTML, not escaped
         })
       })
 
