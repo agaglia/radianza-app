@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Plus, Trash2, Calendar as CalendarIcon, Users, Check, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { generateMeetLink } from '@/lib/meet-generator'
 
 interface Meeting {
   id: string
   title: string
   description: string | null
   date: string
+  meet_link?: string
   created_at: string
   attendance: Array<{
     id: string
@@ -37,6 +39,7 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
     
     try {
       const dateTime = `${newMeeting.date}T${newMeeting.time}:00`
+      const meetLink = generateMeetLink()
       
       const { error } = await supabase
         .from('meetings')
@@ -44,12 +47,13 @@ export default function CalendarClient({ meetings, userId }: { meetings: Meeting
           title: newMeeting.title,
           description: newMeeting.description || null,
           date: dateTime,
+          meet_link: meetLink,
           created_by: userId
         })
 
       if (error) throw error
 
-      alert('✅ Incontro creato con successo!')
+      alert('✅ Incontro creato con successo!\nLink Meet: ' + meetLink)
       setShowModal(false)
       setNewMeeting({ title: '', description: '', date: '', time: '' })
       router.refresh()

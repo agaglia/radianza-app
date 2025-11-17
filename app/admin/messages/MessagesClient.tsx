@@ -8,6 +8,7 @@ interface Meeting {
   title: string
   description: string | null
   date: string
+  meet_link?: string
 }
 
 interface User {
@@ -124,64 +125,128 @@ A presto!
 
 Radianza`,
       htmlBody: `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <style>
-      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-      .header { text-align: center; color: #5a4a7d; margin-bottom: 30px; }
-      .section { background-color: #f8f6fc; border-left: 4px solid #d4a574; padding: 20px; margin: 20px 0; border-radius: 4px; }
-      .section-title { font-size: 14px; font-weight: bold; color: #5a4a7d; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-      .section-content { font-size: 16px; color: #333; }
-      .divider { height: 2px; background: linear-gradient(to right, #d4a574, transparent); margin: 30px 0; }
-      .footer { color: #999; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }
-      .emoji { margin-right: 8px; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <h1>📹 Incontro Radianza</h1>
-      </div>
-
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Incontro Radianza</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 40px 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #d4a574;
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      color: #5a4a7d;
+      margin: 0;
+      font-size: 24px;
+    }
+    .content {
+      margin: 20px 0;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f6fc;
+      border-left: 4px solid #d4a574;
+    }
+    .section-label {
+      font-weight: bold;
+      color: #5a4a7d;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .section-value {
+      font-size: 16px;
+      color: #333;
+      margin: 0;
+    }
+    .divider {
+      height: 1px;
+      background-color: #d4a574;
+      margin: 30px 0;
+    }
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+    .highlight {
+      color: #5a4a7d;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📹 Incontro Radianza</h1>
+    </div>
+    
+    <div class="content">
       <p>Caro partecipante,</p>
       <p>Ti comunichiamo che l'incontro di Radianza è programmato come segue:</p>
-
+      
       <div class="section">
-        <div class="section-title"><span class="emoji">📅</span>DATA E ORA</div>
-        <div class="section-content">{data_incontro} ore {ora_incontro}</div>
+        <div class="section-label">📅 Data e Ora</div>
+        <div class="section-value">{data_incontro} ore {ora_incontro}</div>
       </div>
-
+      
       <div class="section">
-        <div class="section-title"><span class="emoji">📚</span>ARGOMENTO</div>
-        <div class="section-content">{titolo_incontro}</div>
+        <div class="section-label">📚 Argomento</div>
+        <div class="section-value">{titolo_incontro}</div>
       </div>
-
+      
       <div class="section">
-        <div class="section-title"><span class="emoji">📝</span>DESCRIZIONE</div>
-        <div class="section-content">{descrizione_incontro}</div>
+        <div class="section-label">📝 Descrizione</div>
+        <div class="section-value">{descrizione_incontro}</div>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <div style="font-size: 14px; font-weight: bold; color: #5a4a7d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px;">🔗 LINK PER L'ACCESSO</div>
+        <a href="{meetLink1}" style="display: inline-block; background-color: #d4a574; color: white; padding: 15px 40px; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 16px;">Accedi all'incontro su Google Meet</a>
       </div>
 
       <div class="divider"></div>
-
+      
       <div class="section">
-        <div style="margin: 0;">
-          <strong>✅ NON è necessaria alcuna registrazione preventiva.</strong><br>
-          Puoi accedere direttamente all'incontro.
-        </div>
+        <p><strong>✅ NON è necessaria alcuna registrazione preventiva.</strong></p>
+        <p>Puoi accedere direttamente dal link qui sopra.</p>
       </div>
-
-      <p style="font-size: 16px; font-weight: bold; color: #5a4a7d; text-align: center; margin-top: 30px;">
+      
+      <p style="text-align: center; margin-top: 30px; font-size: 16px; color: #5a4a7d;">
         A presto sull'incontro!<br>
-        <span style="font-size: 18px;">✨ Radianza ✨</span>
+        <span style="font-size: 20px;">✨ Radianza ✨</span>
       </p>
-
-      <div class="footer">
-        <p>Questo è un messaggio automatico da Radianza.</p>
-      </div>
     </div>
-  </body>
+    
+    <div class="footer">
+      <p>Questo è un messaggio automatico da Radianza.</p>
+    </div>
+  </div>
+</body>
 </html>`
     }
   ]
@@ -324,6 +389,7 @@ Radianza`
       })
 
       const eventDateTime = `${date} ore ${time}`
+      const meetLink = selectedEmailMeeting.meet_link || ''
 
       let subject = emailSubject
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
@@ -331,6 +397,7 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
+        .replace(/{meetLink1}/g, meetLink)
 
       let body = emailBody
         .replace(/{titolo_incontro}/g, selectedEmailMeeting.title)
@@ -339,6 +406,7 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
+        .replace(/{meetLink1}/g, meetLink)
 
       // Also replace variables in HTML if available
       let html = emailHtml
@@ -348,6 +416,7 @@ Radianza`
         .replace(/{ora_incontro}/g, time)
         .replace(/{eventDateTime}/g, eventDateTime)
         .replace(/{topic}/g, selectedEmailMeeting.title)
+        .replace(/{meetLink1}/g, meetLink)
 
       const response = await fetch('/api/send-email', {
         method: 'POST',
