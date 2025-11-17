@@ -12,7 +12,7 @@ export default function SettingsClient() {
   const [settings, setSettings] = useState({
     groupName: 'Radianza',
     emailFrom: 'noreply@radianza.org',
-    gmailUser: '',
+    resendApiKey: '',
     primaryColor: '#D4AF37',
     secondaryColor: '#1a237e',
     logoUrl: ''
@@ -26,13 +26,13 @@ export default function SettingsClient() {
   const handleSave = async () => {
     setMessage(null)
     try {
-      // Salva le credenziali Gmail in Supabase
+      // Salva le credenziali Resend in Supabase
       const response = await fetch('/api/admin/settings/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          gmailUser: settings.gmailUser,
-          gmailFrom: settings.emailFrom || settings.gmailUser
+          resendApiKey: settings.resendApiKey,
+          emailFrom: settings.emailFrom
         })
       })
 
@@ -173,24 +173,33 @@ export default function SettingsClient() {
             </div>
           </div>
 
-          {/* Configurazione Email Gmail */}
+          {/* Configurazione Email Resend */}
           <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-lg p-6 border border-radianza-gold/30">
             <div className="flex items-center space-x-2 mb-4">
               <Mail className="w-5 h-5 text-radianza-gold" />
-              <h2 className="text-xl font-bold text-radianza-deep-blue">Configurazione Email (Gmail)</h2>
+              <h2 className="text-xl font-bold text-radianza-deep-blue">Configurazione Email (Resend)</h2>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Email Gmail</label>
+                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Resend API Key</label>
                 <input
-                  type="email"
-                  value={settings.gmailUser}
-                  onChange={(e) => setSettings({ ...settings, gmailUser: e.target.value })}
-                  placeholder="tuo-email@gmail.com"
+                  type="password"
+                  value={settings.resendApiKey}
+                  onChange={(e) => setSettings({ ...settings, resendApiKey: e.target.value })}
+                  placeholder="re_xxxxxxxxxxxxxxxxxx"
                   className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
                 />
                 <p className="text-xs text-radianza-deep-blue/60 mt-1">
-                  Il tuo indirizzo Gmail da cui verranno inviate le email (usa OAuth2 automaticamente)
+                  La tua API key da{' '}
+                  <a
+                    href="https://resend.com/api-keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-radianza-gold hover:underline font-medium"
+                  >
+                    Resend Dashboard → API Keys
+                  </a>
+                  . Inizia con <code className="bg-white/50 px-1 rounded">re_</code>
                 </p>
               </div>
 
@@ -204,7 +213,7 @@ export default function SettingsClient() {
                   className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
                 />
                 <p className="text-xs text-radianza-deep-blue/60 mt-1">
-                  Nome visualizzato nelle email (può essere uguale a Email Gmail)
+                  Nome visualizzato nelle email (es. Radianza &lt;noreply@radianza.org&gt;)
                 </p>
               </div>
 
@@ -221,7 +230,7 @@ export default function SettingsClient() {
                   />
                   <button
                     onClick={handleTestEmail}
-                    disabled={testLoading || !settings.gmailUser}
+                    disabled={testLoading || !settings.resendApiKey}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
                   >
                     {testLoading ? 'Invio...' : 'Test'}
@@ -285,7 +294,7 @@ export default function SettingsClient() {
           <div className="flex justify-end space-x-3">
             <button
               onClick={handleSave}
-              disabled={!settings.gmailUser}
+              disabled={!settings.resendApiKey}
               className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <Save className="w-5 h-5" />

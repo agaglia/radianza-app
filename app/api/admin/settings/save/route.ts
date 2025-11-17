@@ -21,26 +21,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Solo admin' }, { status: 403 })
     }
 
-    const { gmailUser, gmailFrom } = await request.json()
+    const { resendApiKey, emailFrom } = await request.json()
 
-    if (!gmailUser) {
+    if (!resendApiKey) {
       return NextResponse.json(
-        { error: 'Email Gmail obbligatoria' },
+        { error: 'Resend API Key obbligatoria' },
         { status: 400 }
       )
     }
 
     // Salva SOLO in Supabase (tabella app_settings)
-    // OAuth2 non richiede password - usa il refresh token da .env
     const { error } = await supabase
       .from('app_settings')
       .upsert(
         {
-          key: 'gmail_config',
+          key: 'email_config',
           value: {
-            gmailUser,
-            gmailFrom: gmailFrom || gmailUser,
-            authMethod: 'OAuth2',
+            resendApiKey,
+            emailFrom: emailFrom || 'onboarding@resend.dev',
+            provider: 'Resend',
             updatedAt: new Date().toISOString()
           },
           updated_at: new Date().toISOString()
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
 
     if (error) throw error
 
-    console.log('✅ Gmail configurato in Supabase')
+    console.log('✅ Resend configurato in Supabase')
     return NextResponse.json({
       success: true,
       message: 'Configurazione salvata con successo!'
