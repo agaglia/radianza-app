@@ -3,40 +3,44 @@ import nodemailer from 'nodemailer'
 import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase/server'
 
-// Variabili globali per OAuth2
-let oauth2Client: any = null
-
-async function getOAuth2Client() {
-  if (oauth2Client) return oauth2Client
-
-  const oauth2 = google.auth.OAuth2
-
-  oauth2Client = new oauth2({
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    redirectUri: process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
-  })
-
-  // Imposta il refresh token (se disponibile)
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN
-  })
-
-  return oauth2Client
-}
-
 async function getTransporter() {
   try {
-    // Usa sempre OAuth2
+    // Valida le credenziali OAuth2
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN) {
-      throw new Error('OAuth2 non configurato: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN sono obbligatori')
+      throw new Error('OAuth2 non configurato: mancano GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET o GOOGLE_REFRESH_TOKEN')
     }
 
-    const oauth2Client = await getOAuth2Client()
-    
-    // Ottieni l'access token
+    if (!process.env.GMAIL_USER) {
+      throw new Error('GMAIL_USER non configurato')
+    }
+
+    console.log('🔑 Configurazione OAuth2...')
+
+    // Crea il client OAuth2
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/callback'
+    )
+
+    // Imposta le credenziali con il refresh token
+    oauth2Client.setCredentials({
+      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+    })
+
+    console.log('🔄 Richiedo access token dal refresh token...')
+
+    // Ottieni il nuovo access token
     const { credentials } = await oauth2Client.refreshAccessToken()
-    
+
+    if (!credentials.access_token) {
+      throw new Error('Access token non ottenuto')
+    }
+
+    console.log('✅ Access token generato correttamente')
+    console.log('📧 User email:', process.env.GMAIL_USER)
+
+    // Crea il transporter con OAuth2 usando il servizio Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -48,13 +52,13 @@ async function getTransporter() {
         accessToken: credentials.access_token,
         expires: credentials.expiry_date
       }
-    })
+    } as any)
 
-    console.log('📧 Uso OAuth2 di Google per:', process.env.GMAIL_USER)
+    console.log('✅ Transporter configurato con OAuth2')
     return transporter
   } catch (err: any) {
-    console.error('❌ Errore OAuth2:', err.message)
-    throw new Error(`Errore configurazione Gmail OAuth2: ${err.message}`)
+    console.error('❌ Errore nel setup OAuth2:', err.message)
+    throw err
   }
 }
 
@@ -83,22 +87,6 @@ export async function POST(request: Request) {
     // Prepara il contenuto HTML
     const emailHtml = html || message.replace(/\n/g, '<br>')
 
-    // Leggi fromEmail da Supabase o .env
-    let fromEmail = process.env.GMAIL_FROM || process.env.GMAIL_USER
-    try {
-      const supabase = await createClient()
-      const { data: setting } = await supabase
-        .from('app_settings')
-        .select('value')
-        .eq('key', 'gmail_config')
-        .single()
-      if (setting?.value?.gmailFrom) {
-        fromEmail = setting.value.gmailFrom
-      }
-    } catch (err) {
-      // Usa il fallback
-    }
-
     console.log('📧 Invio email a:', recipients)
 
     // Invia email
@@ -124,6 +112,7 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     console.error('❌ Errore email:', error.message)
+    console.error('❌ Stack completo:', error.stack)
     return NextResponse.json(
       { success: false, error: error.message || 'Errore sconosciuto' },
       { status: 500 }

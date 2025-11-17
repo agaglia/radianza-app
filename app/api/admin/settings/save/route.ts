@@ -21,16 +21,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Solo admin' }, { status: 403 })
     }
 
-    const { gmailUser, gmailPassword, gmailFrom } = await request.json()
+    const { gmailUser, gmailFrom } = await request.json()
 
-    if (!gmailUser || !gmailPassword) {
+    if (!gmailUser) {
       return NextResponse.json(
-        { error: 'Email e password obbligatorie' },
+        { error: 'Email Gmail obbligatoria' },
         { status: 400 }
       )
     }
 
     // Salva SOLO in Supabase (tabella app_settings)
+    // OAuth2 non richiede password - usa il refresh token da .env
     const { error } = await supabase
       .from('app_settings')
       .upsert(
@@ -38,8 +39,8 @@ export async function POST(request: Request) {
           key: 'gmail_config',
           value: {
             gmailUser,
-            gmailPassword,
             gmailFrom: gmailFrom || gmailUser,
+            authMethod: 'OAuth2',
             updatedAt: new Date().toISOString()
           },
           updated_at: new Date().toISOString()

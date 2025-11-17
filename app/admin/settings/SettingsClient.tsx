@@ -13,7 +13,6 @@ export default function SettingsClient() {
     groupName: 'Radianza',
     emailFrom: 'noreply@radianza.org',
     gmailUser: '',
-    gmailPassword: '',
     primaryColor: '#D4AF37',
     secondaryColor: '#1a237e',
     logoUrl: ''
@@ -33,7 +32,6 @@ export default function SettingsClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           gmailUser: settings.gmailUser,
-          gmailPassword: settings.gmailPassword,
           gmailFrom: settings.emailFrom || settings.gmailUser
         })
       })
@@ -192,29 +190,7 @@ export default function SettingsClient() {
                   className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
                 />
                 <p className="text-xs text-radianza-deep-blue/60 mt-1">
-                  Il tuo indirizzo Gmail da cui verranno inviate le email
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-radianza-deep-blue mb-2">Password App Google</label>
-                <input
-                  type="password"
-                  value={settings.gmailPassword}
-                  onChange={(e) => setSettings({ ...settings, gmailPassword: e.target.value })}
-                  placeholder="••••••••••••••••"
-                  className="w-full px-4 py-2 border border-radianza-gold/30 rounded-lg focus:ring-2 focus:ring-radianza-gold outline-none"
-                />
-                <p className="text-xs text-radianza-deep-blue/60 mt-1">
-                  Genera da{' '}
-                  <a
-                    href="https://myaccount.google.com/apppasswords"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-radianza-gold hover:underline font-medium"
-                  >
-                    Google Account → Security → App passwords
-                  </a>
+                  Il tuo indirizzo Gmail da cui verranno inviate le email (usa OAuth2 automaticamente)
                 </p>
               </div>
 
@@ -245,7 +221,7 @@ export default function SettingsClient() {
                   />
                   <button
                     onClick={handleTestEmail}
-                    disabled={testLoading || !settings.gmailUser || !settings.gmailPassword}
+                    disabled={testLoading || !settings.gmailUser}
                     className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition-colors font-medium"
                   >
                     {testLoading ? 'Invio...' : 'Test'}
@@ -309,7 +285,7 @@ export default function SettingsClient() {
           <div className="flex justify-end space-x-3">
             <button
               onClick={handleSave}
-              disabled={!settings.gmailUser || !settings.gmailPassword}
+              disabled={!settings.gmailUser}
               className="flex items-center space-x-2 px-8 py-3 bg-gradient-to-r from-radianza-gold to-radianza-deep-blue text-white rounded-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <Save className="w-5 h-5" />
